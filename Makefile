@@ -8,8 +8,9 @@ CFLAGS  := -std=c99 -Wall -Wextra -O0 -g -MMD -MP \
            -Iex3_comm_diag/src \
            -Iex4_safety_security/src \
            -Igenerated
+CXX_STATIC := $(shell echo 'int main(){}' | $(CXX) -static-libgcc -static-libstdc++ -x c++ - -o /dev/null 2>/dev/null && echo yes)
 CXXFLAGS := -std=c++11 -Wall -Wextra -O0 -g -MMD -MP \
-            -static-libgcc -static-libstdc++ \
+            $(if $(filter yes,$(CXX_STATIC)),-static-libgcc -static-libstdc++) \
             -Icommon \
             -Iex2_mini_autosar/src \
             -Iex3_comm_diag/src \
