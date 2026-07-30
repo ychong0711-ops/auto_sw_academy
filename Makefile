@@ -72,17 +72,17 @@ $(BUILD)/ex1_8_cpp_fixed_point: ex1_embedded_c/src/ex1_8_cpp_fixed_point.cpp | $
 # ---- EX2: 미니 AUTOSAR (생성된 Cfg 포함) ----
 EX2_GEN_CFG := generated/Com_Cfg.c generated/CanIf_Cfg.c generated/PduR_Cfg.c
 
-$(BUILD)/ex2_signal_flow: ex2_mini_autosar/test/test_ex2_signal_flow.c $(EX2_SRC) $(EX2_GEN_CFG) generated/.stamp | $(BUILD)
+$(BUILD)/ex2_signal_flow: ex2_mini_autosar/test/test_ex2_signal_flow.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD) generated/.stamp
 	$(CC) $(CFLAGS) $^ -o $@
 
 # EX2 개별 계층 단위 테스트
-$(BUILD)/ex2_com: ex2_mini_autosar/test/test_ex2_com.c $(EX2_SRC) $(EX2_GEN_CFG) generated/.stamp | $(BUILD)
+$(BUILD)/ex2_com: ex2_mini_autosar/test/test_ex2_com.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD) generated/.stamp
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BUILD)/ex2_simmcu: ex2_mini_autosar/test/test_ex2_simmcu.c ex2_mini_autosar/src/SimMcu.c | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(BUILD)/ex2_simbus: ex2_mini_autosar/test/test_ex2_simbus.c $(EX2_SRC) $(EX2_GEN_CFG) generated/.stamp | $(BUILD)
+$(BUILD)/ex2_simbus: ex2_mini_autosar/test/test_ex2_simbus.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD) generated/.stamp
 	$(CC) $(CFLAGS) $^ -o $@
 
 # ---- EX3: 통신/진단 ----
@@ -93,8 +93,8 @@ $(BUILD)/ex3_isotp: ex3_comm_diag/test/test_ex3_isotp.c ex3_comm_diag/src/vcan.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BUILD)/ex3_uds: ex3_comm_diag/test/test_ex3_uds.c ex3_comm_diag/src/uds_server.c \
-                  generated/Uds_Data.c generated/Uds_Data.h generated/.stamp | $(BUILD)
-	$(CC) $(CFLAGS) $^ -o $@
+                  generated/Uds_Data.c generated/Uds_Data.h | $(BUILD) generated/.stamp
+	$(CC) $(CFLAGS) $(filter %.c,$^) -o $@
 
 # ---- EX4: 안전/보안 ----
 $(BUILD)/ex4_crc_e2e: ex4_safety_security/test/test_ex4_crc_e2e.c ex4_safety_security/src/crc8.c ex4_safety_security/src/e2e_p01.c | $(BUILD)
@@ -108,8 +108,8 @@ $(BUILD)/ex4_wdg: ex4_safety_security/test/test_ex4_wdg.c ex4_safety_security/sr
 
 # ---- CAPSTONE ----
 $(BUILD)/capstone_demo: capstone/main_capstone.c $(EX3_SRC) $(EX4_SRC) \
-                        generated/Uds_Data.c generated/Uds_Data.h generated/.stamp | $(BUILD)
-	$(CC) $(CFLAGS) $^ -o $@
+                        generated/Uds_Data.c generated/Uds_Data.h | $(BUILD) generated/.stamp
+	$(CC) $(CFLAGS) $(filter %.c,$^) -o $@
 
 # ---- 정적 분석 (cppcheck) ----
 ANALYZE_SRC := $(wildcard ex1_embedded_c/src/*.c ex2_mini_autosar/src/*.c \
