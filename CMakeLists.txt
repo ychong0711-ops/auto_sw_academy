@@ -46,8 +46,11 @@ endforeach()
 # ---- EX2: 미니 AUTOSAR ----
 # 생성된 구성(Cfg) 먼저 생성
 add_custom_command(
-    OUTPUT generated/Com_Cfg.c generated/CanIf_Cfg.c generated/PduR_Cfg.c
-    COMMAND ${Python3_EXECUTABLE} tools/gen_cfg.py
+    OUTPUT generated/Cfg_Ids.h generated/Com_Cfg.c generated/CanIf_Cfg.c
+           generated/PduR_Cfg.c generated/Uds_Data.h generated/Uds_Data.c
+           generated/VehicleNetwork.dbc generated/SIGNAL_DOC.md
+    COMMAND ${Python3_EXECUTABLE} tools/gen_cfg.py config/ecu.json generated/
+    DEPENDS config/ecu.json tools/gen_cfg.py
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "AUTOSAR 구성 생성"
 )
@@ -63,6 +66,10 @@ set_target_properties(ex2_signal_flow PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BUIL
 add_executable(ex2_com ex2_mini_autosar/test/test_ex2_com.c ${EX2_SRC} generated/Com_Cfg.c generated/CanIf_Cfg.c generated/PduR_Cfg.c)
 target_include_directories(ex2_com PRIVATE common generated ex2_mini_autosar/src)
 set_target_properties(ex2_com PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
+
+add_executable(ex2_simmcu ex2_mini_autosar/test/test_ex2_simmcu.c ex2_mini_autosar/src/SimMcu.c)
+target_include_directories(ex2_simmcu PRIVATE common generated ex2_mini_autosar/src)
+set_target_properties(ex2_simmcu PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
 
 add_executable(ex2_simbus ex2_mini_autosar/test/test_ex2_simbus.c ${EX2_SRC} generated/Com_Cfg.c generated/CanIf_Cfg.c generated/PduR_Cfg.c)
 target_include_directories(ex2_simbus PRIVATE common generated ex2_mini_autosar/src)
@@ -108,28 +115,52 @@ set_target_properties(capstone_demo PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BUILD_
 
 # ---- 도구 ----
 add_custom_target(gen
-    COMMAND ${Python3_EXECUTABLE} tools/gen_cfg.py
+    COMMAND ${Python3_EXECUTABLE} tools/gen_cfg.py config/ecu.json generated/
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "AUTOSAR 구성 생성"
 )
 
+set(ALL_TEST_TARGETS
+    ex1_1_bit_ops ex1_2_register_map ex1_3_ring_buffer ex1_4_fixed_point ex1_5_state_machine
+    ex1_6_cpp_state_machine ex1_7_cpp_template_buffer ex1_8_cpp_fixed_point
+    ex2_signal_flow ex2_com ex2_simmcu ex2_simbus
+    ex3_can_signal ex3_isotp ex3_uds
+    ex4_crc_e2e ex4_secoc ex4_wdg
+    capstone_demo
+)
+
+enable_testing()
+foreach(t ${ALL_TEST_TARGETS})
+    add_test(NAME ${t} COMMAND ${BUILD_DIR}/${t})
+endforeach()
+
 add_custom_target(check
-    COMMAND ${Python3_EXECUTABLE} -m pytest tools/ -v
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS gen
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS ${ALL_TEST_TARGETS}
     COMMENT "모든 테스트 실행"
 )
 
 add_custom_target(trace-check
-    COMMAND ${Python3_EXECUTABLE} tools/decode_trace.py generated/VehicleNetwork.dbc logs/capstone_trace.log
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/logs
+    COMMAND ${BUILD_DIR}/capstone_demo --trace ${CMAKE_SOURCE_DIR}/logs/capstone_trace.log > ${CMAKE_SOURCE_DIR}/logs/capstone_console.log
+    COMMAND ${Python3_EXECUTABLE} tools/decode_trace.py          generated/VehicleNetwork.dbc ${CMAKE_SOURCE_DIR}/logs/capstone_trace.log > ${CMAKE_SOURCE_DIR}/logs/decoded_cantools.log
+    COMMAND ${Python3_EXECUTABLE} tools/decode_trace.py --stdlib generated/VehicleNetwork.dbc ${CMAKE_SOURCE_DIR}/logs/capstone_trace.log > ${CMAKE_SOURCE_DIR}/logs/decoded_stdlib.log
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS gen
+    DEPENDS capstone_demo gen
     COMMENT "버스 트레이스 디코드 검증"
 )
 
+add_custom_target(coverage
+    COMMAND ${Python3_EXECUTABLE} tools/report_coverage.py
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    DEPENDS check
+    COMMENT "ISO 26262 구조적 커버리지 리포트 생성"
+)
+
 # 편의상 Makefile 호환 타겟
-add_custom_target(all DEPENDS ex2_signal_flow ex2_com ex2_simbus ex3_can_signal ex3_isotp ex3_uds ex4_crc_e2e ex4_secoc ex4_wdg capstone_demo)
+add_custom_target(all_targets DEPENDS ${ALL_TEST_TARGETS})
 
 # 설치
-install(TARGETS ex2_signal_flow ex2_com ex2_simbus ex3_can_signal ex3_isotp ex3_uds ex4_crc_e2e ex4_secoc ex4_wdg capstone_demo
+install(TARGETS ${ALL_TEST_TARGETS}
         RUNTIME DESTINATION bin)

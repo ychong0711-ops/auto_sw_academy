@@ -32,6 +32,9 @@ generated/.stamp: config/ecu.json tools/gen_cfg.py
 .PHONY: gen
 gen: generated/.stamp
 
+$(GEN_OUTS): generated/.stamp
+	@:
+
 EX1 := ex1_1_bit_ops ex1_2_register_map ex1_3_ring_buffer ex1_4_fixed_point ex1_5_state_machine
 EX1_CPP := ex1_6_cpp_state_machine ex1_7_cpp_template_buffer ex1_8_cpp_fixed_point
 EX2_SRC := $(wildcard ex2_mini_autosar/src/*.c)
@@ -117,7 +120,7 @@ ANALYZE_SRC := $(wildcard ex1_embedded_c/src/*.c ex2_mini_autosar/src/*.c \
                          capstone/*.c)
 
 analyze: $(GEN_OUTS)
-	@echo "=== cppcheck (전체 $((words $(ANALYZE_SRC)))개 소스) ==="; \
+	@echo "=== cppcheck (전체 $(words $(ANALYZE_SRC))개 소스) ==="; \
 	cppcheck --enable=all --inconclusive --std=c99 \
 	  --suppress=missingIncludeSystem \
 	  --suppress=unmatchedSuppression \
@@ -138,6 +141,14 @@ analyze: $(GEN_OUTS)
 strict: CFLAGS += -Werror
 strict: all
 	@echo "[strict] -Werror 빌드 성공 ✔"
+
+# ---- 구조적 코드 커버리지 (ISO 26262 Line Coverage) ----
+coverage: clean
+	@$(MAKE) CFLAGS="-std=c99 -Wall -Wextra -O0 -g -MMD -MP -Icommon -Iex2_mini_autosar/src -Iex3_comm_diag/src -Iex4_safety_security/src -Igenerated --coverage" \
+	         CXXFLAGS="-std=c++11 -Wall -Wextra -O0 -g -MMD -MP -Icommon -Iex2_mini_autosar/src -Iex3_comm_diag/src -Iex4_safety_security/src -Igenerated --coverage" \
+	         check > /dev/null
+	@echo "=== ISO 26262 Structural Code Coverage 리포트 생성 ==="
+	@$(PYTHON) tools/report_coverage.py
 
 # ---- 코드 포맷팅 ----
 format:
@@ -191,4 +202,4 @@ trace-check: $(BUILD)/capstone_demo
 # ---- 헤더 의존성 자동 추적 (.d 파일, -MMD 로 생성됨) ----
 -include $(wildcard $(BUILD)/*.d)
 
-.PHONY: all check clean trace trace-check
+.PHONY: all check clean trace trace-check coverage

@@ -12,25 +12,26 @@ $msysRoot = $msysPaths | Where-Object { Test-Path "$_\usr\bin\bash.exe" } | Sele
 if (-not $msysRoot) { Write-Error "MSYS2를 찾을 수 없습니다. 설치 경로를 확인하세요."; exit 1 }
 
 $env:MSYSTEM = "MINGW64"
+Set-Location $PSScriptRoot
 $env:CHERE_INVOKING = "yes"
 $bashExe = "$msysRoot\usr\bin\bash.exe"
 
 Write-Host "MSYS2 found at: $msysRoot"
 
 Write-Host "=== 빌드: make -j4 ==="
-& $bashExe -l -c "cd /c/java-learning/auto_sw_academy && make -j4"
+& $bashExe -l -c "make -j4"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "=== 테스트: make check ==="
-& $bashExe -l -c "cd /c/java-learning/auto_sw_academy && make check"
+& $bashExe -l -c "make check"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "=== 통합 데모: capstone_demo ==="
-& $bashExe -l -c "cd /c/java-learning/auto_sw_academy && ./build/capstone_demo --trace logs/capstone_trace.log"
+& $bashExe -l -c "mkdir -p logs && ./build/capstone_demo --trace logs/capstone_trace.log"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "=== DBC 트레이스 검증: make trace-check ==="
-& $bashExe -l -c "cd /c/java-learning/auto_sw_academy && make trace-check"
+& $bashExe -l -c "make trace-check"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host ""

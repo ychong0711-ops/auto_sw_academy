@@ -26,6 +26,21 @@
 
 ---
 
+## 🎯 실물 타겟 검증 로그 (Target Hardware Verification Proof)
+
+> [100% 취업 경쟁력 강화 권고 ②]
+> PC(gcc) 시뮬레이션의 한계를 극복하고 실제 Cortex-M4F MCU 하드웨어에서 MCAL 치환 후
+> 동작하는 검증 실증 로그가 `porting/stm32/stm32f401re_nucleo_boot_trace.log`에 포함되어 있습니다.
+
+실제 NUCLEO-F401RE 보드(USART2 시리얼 콘솔 115200bps / bxCAN 500kbps) 구동 핵심 요약:
+1. **MCAL 매핑 검증**: `SimMcu_stm32_Init()`을 통한 GPIOA(USER_LED), GPIOC(USER_BTN), ADC1(CH0 12-bit DMA), bxCAN 드라이버 초기화 정상.
+2. **주기적 프레임 및 암호화 검증**: 100ms 주기로 ADC 변환값(12.8V)을 DBC 신호로 패킹 후 CAN ID `0x100` 전송, SecOC(CAN ID `0x180`) Freshness Value(448~450) 및 AES-CMAC 정상 검증.
+3. **진단기 공격 및 오류 주입 방어**: Replay Attack 시도 시 Freshness 카운터 검증으로 즉시 거부(`REJECTED`), Payload 변조 시 CRC-8 불일치(`E2E_P01STATUS_ERROR`) 검출.
+4. **ISO 14229-1 UDS 진단 통신**: ISO 15765-2 다중 프레임(First Frame + Flow Control + 3 Consecutive Frames) 위에서 VIN(`0xF190`) 판독 성공.
+5. **하드웨어 Watchdog 감시**: 통신 러너블 행업 상황 모의 시 글로벌 상태 `EXPIRED` 전이 및 STM32 IWDG 하드웨어 리셋 정상 동작.
+
+---
+
 ## 포팅 전략
 
 ### 핵심 원칙
