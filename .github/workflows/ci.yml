@@ -36,8 +36,21 @@ jobs:
         if: runner.os == 'Windows'
         run: choco install mingw make python3 --no-progress -y
 
+      - name: Set up Python detection (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          # Windows has 'python' not 'python3' — tell Makefile to use it
+          echo "PYTHON=python" >> $GITHUB_ENV
+          # Create python3→python alias in Git-embedded MSYS2 /usr/bin
+          python_loc=$(command -v python 2>/dev/null || command -v py 2>/dev/null)
+          if [ -n "$python_loc" ] && [ ! -x /usr/bin/python3 ]; then
+            ln -sf "$python_loc" /usr/bin/python3 2>/dev/null || true
+          fi
+
       - name: Install Python packages
-        run: pip3 install cantools
+        run: |
+          py_cmd=$(command -v python3 2>/dev/null || command -v python 2>/dev/null || echo python3)
+          $py_cmd -m pip install cantools
 
       - name: Generate configuration
         run: make gen

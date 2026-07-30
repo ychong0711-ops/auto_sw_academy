@@ -16,6 +16,7 @@ CXXFLAGS := -std=c++11 -Wall -Wextra -O0 -g -MMD -MP \
             -Iex4_safety_security/src \
             -Igenerated
 BUILD   := build
+PYTHON  ?= python3   # <-- supply PYTHON=python env var on Windows
 .DEFAULT_GOAL := all
 
 # ---- 설정 생성 (미니 툴 체인): config/ecu.json -> generated/ ----
@@ -24,7 +25,7 @@ GEN_OUTS := generated/Cfg_Ids.h generated/Com_Cfg.c generated/CanIf_Cfg.c \
             generated/VehicleNetwork.dbc generated/SIGNAL_DOC.md
 
 generated/.stamp: config/ecu.json tools/gen_cfg.py
-	python3 tools/gen_cfg.py config/ecu.json generated/
+	$(PYTHON) tools/gen_cfg.py config/ecu.json generated/
 	@touch $@
 
 .PHONY: gen
@@ -168,14 +169,14 @@ $(TRACE): $(BUILD)/capstone_demo
 	@echo "트레이스/콘솔 로그 저장: $(TRACE), logs/capstone_console.log"
 
 trace: $(TRACE)
-	python3 tools/decode_trace.py generated/VehicleNetwork.dbc $(TRACE)
+	$(PYTHON) tools/decode_trace.py generated/VehicleNetwork.dbc $(TRACE)
 
 # 자동 검증: 두 디코드 엔진(cantools / stdlib) 출력이 같고, 기대 신호 값이 읽히는지 확인
 trace-check: $(BUILD)/capstone_demo
 	@mkdir -p logs
-	./$(BUILD)/capstone_demo --trace $(TRACE) > logs/capstone_console.log
-	python3 tools/decode_trace.py          generated/VehicleNetwork.dbc $(TRACE) > logs/decoded_cantools.log
-	python3 tools/decode_trace.py --stdlib generated/VehicleNetwork.dbc $(TRACE) > logs/decoded_stdlib.log
+	./	$(BUILD)/capstone_demo --trace $(TRACE) > logs/capstone_console.log
+	$(PYTHON) tools/decode_trace.py          generated/VehicleNetwork.dbc $(TRACE) > logs/decoded_cantools.log
+	$(PYTHON) tools/decode_trace.py --stdlib generated/VehicleNetwork.dbc $(TRACE) > logs/decoded_stdlib.log
 	@if diff <(tail -n +2 logs/decoded_cantools.log) <(tail -n +2 logs/decoded_stdlib.log) > /dev/null; then \
 	  echo "[trace-check] cantools vs stdlib 디코드 출력 일치 ✔"; \
 	else echo "[trace-check] 두 엔진 출력 불일치 ✘"; exit 1; fi
