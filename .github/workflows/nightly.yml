@@ -26,7 +26,7 @@ jobs:
       - name: Install system dependencies
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
-            sudo apt-get update && sudo apt-get install -y gcc make python3-pip valgrind
+            sudo apt-get update && sudo apt-get install -y gcc g++ make python3-pip valgrind
           elif [ "$RUNNER_OS" = "macOS" ]; then
             brew install gcc make python3
           fi
@@ -46,6 +46,7 @@ jobs:
       - name: Memory check (Linux only)
         if: runner.os == 'Linux'
         run: |
+          set -o pipefail
           for t in build/ex1_* build/ex2_* build/ex3_* build/ex4_*; do
             echo "=== valgrind $t ==="
             valgrind --leak-check=full --error-exitcode=1 "$t" 2>&1 | tail -5

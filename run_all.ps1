@@ -1,21 +1,37 @@
-# Auto SW Academy — 전체 빌드 + 전체 테스트 + 통합 데모 (Windows PowerShell)
-# Usage: .\run_all.ps1
+# Auto SW Academy — Windows 전체 파이프라인 (PowerShell)
+# MSYS2 경로 자동 탐색 + 모든 단계 MINGW64 고정
+$msysPaths = @(
+    "C:\msys64",
+    "C:\msys32",
+    "$env:ProgramFiles\msys64",
+    "$env:LOCALAPPDATA\msys64",
+    "D:\msys64",
+    "D:\msys32"
+)
+$msysRoot = $msysPaths | Where-Object { Test-Path "$_\usr\bin\bash.exe" } | Select-Object -First 1
+if (-not $msysRoot) { Write-Error "MSYS2를 찾을 수 없습니다. 설치 경로를 확인하세요."; exit 1 }
 
-Write-Host "==> 빌드" -ForegroundColor Cyan
-& "C:\msys64\usr\bin\bash.exe" -l -c "cd '$PWD' && make -j4"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-Write-Host "`n==> 전체 테스트" -ForegroundColor Cyan
-& "C:\msys64\usr\bin\bash.exe" -l -c "cd '$PWD' && make check"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-Write-Host "`n==> 통합 데모 (capstone)" -ForegroundColor Cyan
 $env:MSYSTEM = "MINGW64"
 $env:CHERE_INVOKING = "yes"
-& "C:\msys64\usr\bin\bash.exe" -l -c "cd '$PWD' && mkdir -p logs && ./build/capstone_demo --trace logs/capstone_trace.log 2>&1" | Tee-Object -FilePath "capstone_output.txt"
+$bashExe = "$msysRoot\usr\bin\bash.exe"
 
-Write-Host "`n==> 트레이스 DBC 디코드 (미니 CANoe 워크플로)" -ForegroundColor Cyan
-& "C:\msys64\usr\bin\bash.exe" -l -c "cd '$PWD' && make trace-check"
+Write-Host "MSYS2 found at: $msysRoot"
+
+Write-Host "=== 빌드: make -j4 ==="
+& $bashExe -l -c "cd /c/java-learning/auto_sw_academy && make -j4"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-Write-Host "`n모든 단계 성공적으로 완료!" -ForegroundColor Green
+Write-Host "=== 테스트: make check ==="
+& $bashExe -l -c "cd /c/java-learning/auto_sw_academy && make check"
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+Write-Host "=== 통합 데모: capstone_demo ==="
+& $bashExe -l -c "cd /c/java-learning/auto_sw_academy && ./build/capstone_demo --trace logs/capstone_trace.log"
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+Write-Host "=== DBC 트레이스 검증: make trace-check ==="
+& $bashExe -l -c "cd /c/java-learning/auto_sw_academy && make trace-check"
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+Write-Host ""
+Write-Host "전체 파이프라인 완료"

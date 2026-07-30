@@ -1,4 +1,4 @@
-# Auto SW Academy - 전체 빌드 (gcc / g++ 만 있으면 됩니다)
+# Auto SW Academy - 전체 빌드 (gcc / g++ 만 있으면 됩니다, GNU Make 3.81+)
 SHELL   := /bin/bash
 CC      ?= gcc
 CXX     ?= g++
@@ -23,11 +23,12 @@ GEN_OUTS := generated/Cfg_Ids.h generated/Com_Cfg.c generated/CanIf_Cfg.c \
             generated/PduR_Cfg.c generated/Uds_Data.h generated/Uds_Data.c \
             generated/VehicleNetwork.dbc generated/SIGNAL_DOC.md
 
-$(GEN_OUTS) &: config/ecu.json tools/gen_cfg.py
+generated/.stamp: config/ecu.json tools/gen_cfg.py
 	python3 tools/gen_cfg.py config/ecu.json generated/
+	@touch $@
 
-gen: $(GEN_OUTS)
-	@echo "생성 툴 완료"
+.PHONY: gen
+gen: generated/.stamp
 
 EX1 := ex1_1_bit_ops ex1_2_register_map ex1_3_ring_buffer ex1_4_fixed_point ex1_5_state_machine
 EX1_CPP := ex1_6_cpp_state_machine ex1_7_cpp_template_buffer ex1_8_cpp_fixed_point
@@ -69,17 +70,17 @@ $(BUILD)/ex1_8_cpp_fixed_point: ex1_embedded_c/src/ex1_8_cpp_fixed_point.cpp | $
 # ---- EX2: 미니 AUTOSAR (생성된 Cfg 포함) ----
 EX2_GEN_CFG := generated/Com_Cfg.c generated/CanIf_Cfg.c generated/PduR_Cfg.c
 
-$(BUILD)/ex2_signal_flow: ex2_mini_autosar/test/test_ex2_signal_flow.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD)
+$(BUILD)/ex2_signal_flow: ex2_mini_autosar/test/test_ex2_signal_flow.c $(EX2_SRC) $(EX2_GEN_CFG) generated/.stamp | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
 # EX2 개별 계층 단위 테스트
-$(BUILD)/ex2_com: ex2_mini_autosar/test/test_ex2_com.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD)
+$(BUILD)/ex2_com: ex2_mini_autosar/test/test_ex2_com.c $(EX2_SRC) $(EX2_GEN_CFG) generated/.stamp | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BUILD)/ex2_simmcu: ex2_mini_autosar/test/test_ex2_simmcu.c ex2_mini_autosar/src/SimMcu.c | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(BUILD)/ex2_simbus: ex2_mini_autosar/test/test_ex2_simbus.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD)
+$(BUILD)/ex2_simbus: ex2_mini_autosar/test/test_ex2_simbus.c $(EX2_SRC) $(EX2_GEN_CFG) generated/.stamp | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
 # ---- EX3: 통신/진단 ----
@@ -90,7 +91,7 @@ $(BUILD)/ex3_isotp: ex3_comm_diag/test/test_ex3_isotp.c ex3_comm_diag/src/vcan.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(BUILD)/ex3_uds: ex3_comm_diag/test/test_ex3_uds.c ex3_comm_diag/src/uds_server.c \
-                  generated/Uds_Data.c generated/Uds_Data.h | $(BUILD)
+                  generated/Uds_Data.c generated/Uds_Data.h generated/.stamp | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
 # ---- EX4: 안전/보안 ----
@@ -105,7 +106,7 @@ $(BUILD)/ex4_wdg: ex4_safety_security/test/test_ex4_wdg.c ex4_safety_security/sr
 
 # ---- CAPSTONE ----
 $(BUILD)/capstone_demo: capstone/main_capstone.c $(EX3_SRC) $(EX4_SRC) \
-                        generated/Uds_Data.c generated/Uds_Data.h | $(BUILD)
+                        generated/Uds_Data.c generated/Uds_Data.h generated/.stamp | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
 # ---- 정적 분석 (cppcheck) ----
