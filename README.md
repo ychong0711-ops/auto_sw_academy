@@ -1,9 +1,9 @@
 # 🚗 Auto SW Academy — AUTOSAR 역량 체인 실습 프로그램
 
-[![ci](https://github.com/<ychong0711-ops>/auto_sw_academy/actions/workflows/ci.yml/badge.svg)](https://github.com/<your-id>/auto_sw_academy/actions)
-[![nightly](https://github.com/<ychong0711-ops>/auto_sw_academy/actions/workflows/nightly.yml/badge.svg)](https://github.com/<your-id>/auto_sw_academy/actions/workflows/nightly.yml)
+[![ci](https://github.com/ychong0711-ops/auto_sw_academy/actions/workflows/ci.yml/badge.svg)](https://github.com/ychong0711-ops/auto_sw_academy/actions)
+[![nightly](https://github.com/ychong0711-ops/auto_sw_academy/actions/workflows/nightly.yml/badge.svg)](https://github.com/ychong0711-ops/auto_sw_academy/actions/workflows/nightly.yml)
 
-> ⚠️ GitHub에 push 전에 `<your-id>`를 본인 GitHub 계정명으로 바꾸세요.
+> ⚠️ GitHub에 push 시 CI가 자동 실행됩니다. 배지가 초록색이면 통과입니다.
 > 그러면 push/PR 시 CI가 자동 실행되고 배지가 초록색으로 활성화됩니다.
 
 > **C/C++ 임베디드 → AUTOSAR BSW/MCAL → 자동차 통신/진단 → 기능안전/보안/ASPICE**
