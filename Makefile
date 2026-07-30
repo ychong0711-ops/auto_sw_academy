@@ -199,7 +199,11 @@ trace-check: $(BUILD)/capstone_demo
 	  && echo "[trace-check] 메시지 집계(VehicleState x3) ✔" \
 	  || { echo "[trace-check] 메시지 집계 실패 ✘"; exit 1; }
 
+# ---- 대화형 학습 코치 및 자가 진단 (4주 로드맵 / 추적성 / 오류주입 / 퀴즈) ----
+study: all
+	@$(PYTHON) tools/study_trainer.py
+
 # ---- 헤더 의존성 자동 추적 (.d 파일, -MMD 로 생성됨) ----
 -include $(wildcard $(BUILD)/*.d)
 
-.PHONY: all check clean trace trace-check coverage
+.PHONY: all check clean trace trace-check coverage study

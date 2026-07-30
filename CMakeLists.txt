@@ -158,6 +158,13 @@ add_custom_target(coverage
     COMMENT "ISO 26262 구조적 커버리지 리포트 생성"
 )
 
+add_custom_target(study
+    COMMAND ${Python3_EXECUTABLE} tools/study_trainer.py
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    DEPENDS ${ALL_TEST_TARGETS}
+    COMMENT "대화형 실전 학습 코치 실행"
+)
+
 # 편의상 Makefile 호환 타겟
 add_custom_target(all_targets DEPENDS ${ALL_TEST_TARGETS})
 

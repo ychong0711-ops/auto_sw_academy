@@ -16,6 +16,7 @@
 cd auto_sw_academy
 make -j4          # 설정 생성(tools/gen_cfg.py) → 전체 빌드 (경고 0건 기준)
 make check       # 전체 테스트 18종, 259개 체크
+make study        # 4주 마스터 로드맵 + ASPICE 추적성 + 오류주입 랩 + 졸업 진단 퀴즈 (대화형 코치)
 ./build/capstone_demo   # 통합 시연 (아래 '통합 데모' 참조)
 make trace-check  # 버스 트레이스 기록 → 생성된 .dbc 로 신호 디코드 (미니 CANoe 워크플로)
 make coverage     # ISO 26262 구조적 코드 커버리지 분석 (92.98% ASIL-D 달성 리포트 생성)
