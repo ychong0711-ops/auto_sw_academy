@@ -1,0 +1,20 @@
+# Auto SW Academy — clang-format 설정
+# AUTOSAR MISRA-C 계열 스타일을 준수하도록 구성
+BasedOnStyle: Google
+IndentWidth: 4
+UseTab: Never
+ColumnLimit: 100
+AllowShortFunctionsOnASingleLine: None
+AllowShortBlocksOnASingleLine: Never
+AllowShortIfStatementsOnASingleLine: Never
+BreakBeforeBraces: Allman
+PointerAlignment: Right
+SpaceAfterCStyleCast: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+SortIncludes: true
+IncludeCategories:
+  - Regex: '^<.*>'
+    Priority: 1
+  - Regex: '^"'
+    Priority: 2

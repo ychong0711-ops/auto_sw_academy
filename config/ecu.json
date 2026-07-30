@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "project": "AutoSW-Academy MiniECU",
+    "note": "단일 소스(single source of truth). 실무의 ARXML/DBC 입력 파일 역할",
+    "generator": "tools/gen_cfg.py"
+  },
+  "can_frames": [
+    {
+      "name": "VehicleState",
+      "macro": "VEHSTATE",
+      "can_id": "0x100",
+      "direction": "TX",
+      "dlc": 8,
+      "period_ms": 100,
+      "comment": "센서/제어 상태 주기 송신",
+      "signals": [
+        {"name": "BatteryVoltage", "start_bit": 0,  "length": 12, "byte_order": "little", "factor": 0.1, "offset": 0.0, "unit": "V"},
+        {"name": "LightSwitch",    "start_bit": 12, "length": 1,  "byte_order": "little", "factor": 1, "offset": 0},
+        {"name": "HeadlightCmd",   "start_bit": 13, "length": 1,  "byte_order": "little", "factor": 1, "offset": 0}
+      ]
+    },
+    {
+      "name": "LightOverride",
+      "macro": "LIGHT_OVR",
+      "can_id": "0x200",
+      "direction": "RX",
+      "dlc": 2,
+      "comment": "BCM 의 강제 제어 명령 (이벤트)",
+      "signals": [
+        {"name": "OverrideMode", "start_bit": 0, "length": 8, "byte_order": "little", "factor": 1, "offset": 0},
+        {"name": "OverrideKey",  "start_bit": 8, "length": 8, "byte_order": "little", "factor": 1, "offset": 0}
+      ]
+    }
+  ],
+  "uds": {
+    "dids": [
+      {"id": "0xF190", "name": "VIN",           "access": "read",       "kind": "static",  "value": "ARENA000000000001", "value_kind": "ascii"},
+      {"id": "0xF18C", "name": "EcuSerial",     "access": "read",       "kind": "static",  "value": "0x20,0x26,0x07,0x30", "value_kind": "hexbytes", "length": 4},
+      {"id": "0xF186", "name": "ActiveSession", "access": "read",       "kind": "dynamic", "length": 1},
+      {"id": "0x1234", "name": "VehicleSpeed",  "access": "read-write", "kind": "dynamic", "length": 2}
+    ]
+  }
+}

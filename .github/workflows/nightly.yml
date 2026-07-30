@@ -1,0 +1,52 @@
+# Auto SW Academy — Nightly full rebuild & regression check
+# Runs daily at 02:00 UTC to catch environment drift and regressions.
+name: nightly
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  nightly-check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo apt-get update && sudo apt-get install -y gcc make python3-pip valgrind
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            brew install gcc make python3
+          fi
+
+      - name: Install Python packages
+        run: pip3 install cantools
+
+      - name: Full clean rebuild
+        run: make clean && make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+
+      - name: Run all test suites
+        run: make check
+
+      - name: DBC trace decode verification
+        run: make trace-check
+
+      - name: Memory check (Linux only)
+        if: runner.os == 'Linux'
+        run: |
+          for t in build/ex1_* build/ex2_* build/ex3_* build/ex4_*; do
+            echo "=== valgrind $t ==="
+            valgrind --leak-check=full --error-exitcode=1 "$t" 2>&1 | tail -5
+          done

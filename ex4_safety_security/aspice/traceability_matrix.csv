@@ -1,0 +1,43 @@
+SRS_ID,요구사항,SW유닛(파일),구현 함수,테스트 케이스,검증 방법,결과
+SRS_BIT_010,비트 제어 매크로 제공,ex1/ex1_1_bit_ops.c,SET_BIT/CLR_BIT/TGL_BIT,TC_BIT_010_01~03,단위테스트,PASS
+SRS_BIT_020,비트 필드 읽기/쓰기,ex1/ex1_1_bit_ops.c,field_get/field_set,TC_BIT_020_01~02,단위테스트,PASS
+SRS_REG_010,BSRR 원자적 출력 제어,ex1/ex1_2_register_map.c,gpio_write_pin,TC_REG_010_01~03,단위테스트,PASS
+SRS_RB_010,링버퍼 유실 감지,ex1/ex1_3_ring_buffer.c,rb_push,TC_RB_004~006,단위테스트,PASS
+SRS_DIO_010,DIO 채널 쓰기,ex2/src/Dio.c,Dio_WriteChannel,TC_EX2_001,통합테스트,PASS
+SRS_ADC_010,ADC 그룹 읽기,ex2/src/Adc.c,Adc_ReadGroup,TC_EX2_001,통합테스트,PASS
+SRS_CAN_010,CAN 프레임 송신,ex2/src/Can.c,Can_Write,TC_EX2_001,통합테스트,PASS
+SRS_CANIF_010,TX PDU 매핑,ex2/src/CanIf.c,CanIf_Transmit,TC_EX2_001,통합테스트,PASS
+SRS_CANIF_020,RX 소프트웨어 필터링,ex2/src/CanIf.c,CanIf_RxIndication,TC_EX2_002,통합테스트,PASS
+SRS_COM_010,시그널 I-PDU 패킹,ex2/src/Com.c,Com_SendSignal,TC_EX2_001,통합테스트,PASS
+SRS_COM_020,시그널 언패킹,ex2/src/Com.c,Com_ReceiveSignal,TC_EX2_002,통합테스트,PASS
+SRS_COM_030,주기 송신,ex2/src/Com.c,Com_MainFunctionTx,TC_EX2_001,통합테스트,PASS
+SRS_APP_010,센서 SWC 발행,ex2/src/SensorSwc.c,SensorSwc_Runnable,TC_EX2_001,통합테스트,PASS
+SRS_APP_020,전조등 제어 로직,ex2/src/LightCtrlSwc.c,LightCtrlSwc_Runnable,TC_EX2_001~003,통합테스트,PASS
+SRS_EX2_001,TX 신호 경로 정합,ex2/test/test_ex2_signal_flow.c,-,TC_EX2_001,통합테스트,PASS
+SRS_EX2_002,RX 오버라이드 우선,ex2/test/test_ex2_signal_flow.c,-,TC_EX2_002,통합테스트,PASS
+SRS_SIG_010,CAN 신호 raw 추출,ex3/src/can_signal.c,CanSig_ExtractRaw,TC_SIG_002/011,단위테스트,PASS
+SRS_SIG_020,CAN 신호 raw 삽입,ex3/src/can_signal.c,CanSig_InsertRaw,TC_SIG_001/010/012,단위테스트,PASS
+SRS_SIG_030,factor/offset 변환,ex3/src/can_signal.c,CanSig_ToPhysical,TC_SIG_030/031,단위테스트,PASS
+SRS_TP_010,ISO-TP 메시지 송신,ex3/src/isotp.c,IsoTp_Send,TC_TP_001/002,단위테스트,PASS
+SRS_TP_020,ISO-TP 다중프레임 수신,ex3/src/isotp.c,IsoTp_OnCanFrame,TC_TP_003,단위테스트,PASS
+SRS_TP_030,CF 시퀀스 감시,ex3/src/isotp.c,IsoTp_OnCanFrame,TC_TP_030,오류주입테스트,PASS
+SRS_TP_040,STmin 페이싱,ex3/src/isotp.c,IsoTp_MainFunction,TC_TP_040,타이밍테스트,PASS
+SRS_UDS_010,UDS 서비스 디스패치,ex3/src/uds_server.c,Uds_OnRequest,TC_UDS_010,단위테스트,PASS
+SRS_UDS_020,세션/S3 관리,ex3/src/uds_server.c,Uds_Tick10ms,TC_UDS_020/060,단위테스트,PASS
+SRS_UDS_030,SecurityAccess,ex3/src/uds_server.c,svc27_security,TC_UDS_030/031,단위테스트,PASS
+SRS_UDS_040,DTC 읽기/삭제,ex3/src/uds_server.c,svc14/19,TC_UDS_040,단위테스트,PASS
+SRS_UDS_050,긍정응답 억제,ex3/src/uds_server.c,Uds_OnRequest,TC_UDS_020,단위테스트,PASS
+SRS_E2E_010,CRC-8 J1850 정확성,ex4/src/crc8.c,Crc8_J1850,TC_E2E_010,벡터테스트,PASS
+SRS_E2E_020,E2E 카운터 감시,ex4/src/e2e_p01.c,E2E_P01Check,TC_E2E_020/021,단위+오류주입,PASS
+SRS_E2E_030,오염 데이터 검출,ex4/src/e2e_p01.c,E2E_P01Check,TC_E2E_030,오류주입테스트,PASS
+SRS_SEC_010,AES-128 정확성,ex4/src/aes_mini.c,Aes128_EncryptBlock,TC_SEC_010,FIPS-197벡터,PASS
+SRS_SEC_020,AES-CMAC 정확성,ex4/src/cmac.c,Cmac_Calculate,TC_SEC_020,RFC4493벡터,PASS
+SRS_SECOC_010,보호 프레임 생성,ex4/src/secoc.c,SecOC_Secure,TC_SECOC_010,단위테스트,PASS
+SRS_SECOC_020,인증/재전송 방어,ex4/src/secoc.c,SecOC_Verify,TC_SECOC_020,오류주입테스트,PASS
+SRS_WDG_010,생존 감시 정상,ex4/src/wdg.c,WdgM_MainFunction,TC_WDG_010,단위테스트,PASS
+SRS_WDG_020,마감 초과 검출,ex4/src/wdg.c,WdgM_MainFunction,TC_WDG_020,오류주입테스트,PASS
+SRS_WDG_030,자동 복구 금지,ex4/src/wdg.c,WdgM_Reset,TC_WDG_020~030,단위테스트,PASS
+SRS_GEN_010,설정 검증(validation),tools/gen_cfg.py,validate,발생 로그(validation 데모),수동실행,PASS
+SRS_GEN_020,Cfg 코드/DBC/문서 생성,tools/gen_cfg.py,main,전체 스위트 재빌드+PASS,자동빌드,PASS
+SRS_MON_010,버스 모니터 트레이스(TX 시점 기록),ex3/src/vcan.c,VCan_TraceOpen/VCan_TraceSetNow/VCan_Send,logs/capstone_trace.log 형식 검증,통합실행(make trace-check),PASS
+SRS_MON_020,DBC 기반 트레이스 디코드,tools/decode_trace.py,load_dbc_cantools/load_dbc_stdlib/decode_trace,엔진 2종 출력 일치 diff + 기대 신호(12.8V) 디코드,자동검증(make trace-check),PASS

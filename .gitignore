@@ -1,0 +1,29 @@
+# Auto SW Academy — .gitignore
+
+# Build outputs
+build/
+logs/
+capstone_output.txt
+
+# Generated configuration (regeneratable)
+generated/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# CMake
+build-cmake/
+CMakeUserPresets.json

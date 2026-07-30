@@ -1,0 +1,177 @@
+# Makefile.stm32 — auto_sw_academy → STM32 크로스 컴파일
+#
+# 사용법:
+#   make -f porting/stm32/Makefile.stm32          # 빌드
+#   make -f porting/stm32/Makefile.stm32 flash     # 플래싱
+#   make -f porting/stm32/Makefile.stm32 debug     # GDB 디버깅
+#
+# 사전 조건:
+#   1. STM32CubeMX로 NUCLEO-F401RE 프로젝트 생성 → stm32/ 에 복사
+#   2. ARM 크로스 컴파일러 설치 (arm-none-eabi-gcc)
+#   3. OpenOCD 설치 (플래싱/디버깅)
+#
+# 타겟 MCU: STM32F401RE (Cortex-M4F, 512KB Flash, 96KB RAM)
+
+SHELL   := /bin/bash
+BUILD   := build_stm32
+
+# ---- 크로스 컴파일러 ----
+CROSS   ?= arm-none-eabi-
+CC      := $(CROSS)gcc
+CXX     := $(CROSS)g++
+LD      := $(CROSS)gcc
+OBJCOPY := $(CROSS)objcopy
+SIZE    := $(CROSS)size
+GDB     := $(CROSS)gdb
+
+# ---- 타겟 설정 (STM32F401RE) ----
+MCU   := -mcpu=cortex-m4 -mthumb
+FPU   := -mfloat-abi=hard -mfpu=fpv4-sp-d16
+SPECS := --specs=nano.specs --specs=nosys.specs
+
+# ---- 최적화 (Release: -O2, Debug: -O0 -g) ----
+OPT      := -O2 -g
+DEFINES  := -DSTM32F401xE -DUSE_HAL_DRIVER
+
+# ---- AUTOSAR 소스 경로 ----
+EX2_DIR := ex2_mini_autosar
+EX3_DIR := ex3_comm_diag
+EX4_DIR := ex4_safety_security
+
+# ---- STM32 HAL 소스 경로 (STM32CubeMX 생성) ----
+HAL_DIR    := stm32/Drivers/STM32F4xx_HAL_Driver
+CORE_DIR   := stm32/Core
+STARTUP_DIR := stm32/Startup
+
+# ---- 공용 include 경로 ----
+INC := -Icommon \
+       -I$(EX2_DIR)/src \
+       -I$(EX3_DIR)/src \
+       -I$(EX4_DIR)/src \
+       -Igenerated \
+       -Iporting/stm32 \
+       -I$(CORE_DIR)/Inc \
+       -I$(HAL_DIR)/Inc
+
+# ---- C/C++ 플래그 ----
+CFLAGS   := -std=c99 $(MCU) $(FPU) $(OPT) $(DEFINES) $(INC) \
+            -Wall -Wextra -Wno-unused-parameter \
+            -ffunction-sections -fdata-sections -fstack-usage
+CXXFLAGS := -std=c++11 $(MCU) $(FPU) $(OPT) $(DEFINES) $(INC) \
+            -Wall -Wextra -Wno-unused-parameter \
+            -ffunction-sections -fdata-sections -fstack-usage
+LDFLAGS  := $(MCU) $(FPU) $(SPECS) \
+            -T$(CORE_DIR)/Linker/STM32F401RETx_FLASH.ld \
+            -Wl,-Map=$(BUILD)/capstone_demo.map,--cref \
+            -Wl,--gc-sections -lc -lm -lnosys
+
+# ---- 링커 스크립트 자동 탐색 ----
+LINKER_SCRIPT := $(wildcard $(CORE_DIR)/Linker/*.ld $(STARTUP_DIR)/*.ld)
+ifeq ($(LINKER_SCRIPT),)
+  # CubeMX 버전에 따라 위치 차이
+  LINKER_SCRIPT := $(wildcard $(CORE_DIR)/*.ld)
+endif
+ifneq ($(LINKER_SCRIPT),)
+  LDFLAGS := $(MCU) $(FPU) $(SPECS) \
+             -T$(LINKER_SCRIPT) \
+             -Wl,-Map=$(BUILD)/capstone_demo.map,--cref \
+             -Wl,--gc-sections -lc -lm -lnosys
+endif
+
+# ---- AUTOSAR 소스 (원본 그대로 사용) ----
+EX2_SRC := $(wildcard $(EX2_DIR)/src/*.c)
+EX3_SRC := $(EX3_DIR)/src/vcan.c $(EX3_DIR)/src/can_signal.c \
+           $(EX3_DIR)/src/isotp.c $(EX3_DIR)/src/uds_server.c
+EX4_SRC := $(wildcard $(EX4_DIR)/src/*.c)
+
+# ---- 포팅 레이어 (MCAL 대체) ----
+PORTING_SRC := porting/stm32/SimMcu_stm32.c
+
+# ---- STM32 HAL + Startup 코드 ----
+HAL_SRC := $(wildcard $(HAL_DIR)/Src/*.c)
+CORE_SRC := $(wildcard $(CORE_DIR)/Src/*.c)
+STARTUP_ASM := $(wildcard $(STARTUP_DIR)/*.s $(CORE_DIR)/Startup/*.s)
+
+# ---- main (capstone) + UDS 설정 ----
+CAPSTONE_SRC := capstone/main_stm32.c
+UDS_GEN_SRC   := generated/Uds_Data.c
+
+# ---- 모든 소스 ----
+SRCS := $(EX2_SRC) $(EX3_SRC) $(EX4_SRC) \
+        $(PORTING_SRC) \
+        $(HAL_SRC) $(CORE_SRC) \
+        $(CAPSTONE_SRC) $(UDS_GEN_SRC)
+
+OBJS := $(SRCS:%.c=$(BUILD)/%.o)
+DEPS := $(OBJS:%.o=%.d)
+
+# ---- Startup ASM ----
+ifneq ($(STARTUP_ASM),)
+  STARTUP_OBJ := $(BUILD)/startup.o
+  OBJS += $(STARTUP_OBJ)
+endif
+
+# ---- 실행 파일 ----
+TARGET := $(BUILD)/capstone_demo.elf
+
+# ---- 기본 타겟 ----
+all: $(TARGET)
+	@$(SIZE) $(TARGET)
+	@echo "[STM32] 빌드 완료: $(TARGET)"
+
+# ---- 링크 ----
+$(TARGET): $(OBJS) | $(BUILD)
+	$(LD) $(OBJS) $(LDFLAGS) -o $@
+
+# ---- C 컴파일 ----
+$(BUILD)/%.o: %.c | $(BUILD)
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+
+# ---- 어셈블리 (startup) ----
+$(BUILD)/startup.o: $(STARTUP_ASM) | $(BUILD)
+	$(CC) $(MCU) $(FPU) -x assembler-with-cpp -c $< -o $@
+
+$(BUILD):
+	mkdir -p $(BUILD)
+
+# ---- 설정 생성 (tools/gen_cfg.py) ----
+GEN_OUTS := generated/Cfg_Ids.h generated/Com_Cfg.c generated/CanIf_Cfg.c \
+            generated/PduR_Cfg.c generated/Uds_Data.h generated/Uds_Data.c \
+            generated/VehicleNetwork.dbc generated/SIGNAL_DOC.md
+
+$(GEN_OUTS) &: config/ecu.json tools/gen_cfg.py
+	python3 tools/gen_cfg.py config/ecu.json generated/
+
+gen: $(GEN_OUTS)
+	@echo "생성 툴 완료"
+
+# ---- 플래싱 (OpenOCD) ----
+flash: $(TARGET)
+	@echo "[STM32] OpenOCD 플래싱..."
+	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg \
+	  -c "program $(TARGET) verify reset exit" 2>&1
+
+# ---- GDB 디버깅 ----
+debug: $(TARGET)
+	@echo "[STM32] GDB 디버깅 시작..."
+	$(GDB) $(TARGET) -ex "target remote localhost:3333" \
+	  -ex "monitor reset halt" \
+	  -ex "load" \
+	  -ex "continue"
+
+# ---- 세그사이즈 확인 ----
+size: $(TARGET)
+	$(SIZE) $(TARGET)
+	@echo "--- Flash/메모리 사용량 ---"
+	arm-none-eabi-objdump -h $(TARGET) | grep -E '\.(text|rodata|data|bss)'
+	arm-none-eabi-size -A $(TARGET)
+
+# ---- 클린 ----
+clean:
+	rm -rf $(BUILD)
+
+# ---- 의존성 자동 포함 ----
+-include $(DEPS)
+
+.PHONY: all flash debug size clean gen

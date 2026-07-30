@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto SW Academy — 학습 자료 추천</title>
+<style>
+  :root {
+    --primary: #1a56db;
+    --primary-light: #e8effd;
+    --accent: #0d9488;
+    --yt: #ff0000;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --success: #16a34a;
+    --book: #7c3aed;
+    --course: #0891b2;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  .wrapper { display: flex; max-width: 1280px; margin: 0 auto; min-height: 100vh; }
+
+  /* ---- Sidebar ---- */
+  .sidebar {
+    width: 260px; flex-shrink: 0;
+    position: sticky; top: 0; align-self: flex-start;
+    height: 100vh; overflow-y: auto;
+    background: var(--card); border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+  }
+  .sidebar h2 {
+    font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted); padding: 0 1.25rem; margin-bottom: 0.75rem;
+  }
+  .sidebar nav a {
+    display: block; padding: 0.4rem 1.25rem; text-decoration: none;
+    color: var(--text); font-size: 0.88rem; border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .sidebar nav a:hover, .sidebar nav a.active {
+    background: var(--primary-light); color: var(--primary);
+    border-left-color: var(--primary);
+  }
+  .sidebar nav a.sub { padding-left: 2.25rem; font-size: 0.83rem; color: var(--text-muted); }
+  .sidebar .logo {
+    padding: 0 1.25rem 1.25rem; margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700; font-size: 1.1rem;
+  }
+  .sidebar .logo small { display: block; font-weight: 400; font-size: 0.75rem; color: var(--text-muted); }
+
+  /* ---- Content ---- */
+  .content { flex: 1; min-width: 0; padding: 2.5rem 3rem 4rem; max-width: 920px; }
+  .content h1 {
+    font-size: 2rem; margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary);
+  }
+  .content h2 {
+    font-size: 1.35rem; margin-top: 2.5rem; margin-bottom: 0.75rem;
+    padding-bottom: 0.3rem; border-bottom: 1px solid var(--border);
+  }
+  .content h3 { font-size: 1.05rem; margin-top: 1.5rem; margin-bottom: 0.4rem; }
+  .content p, .content .desc { margin-bottom: 0.9rem; color: var(--text); }
+  .content ul { margin-bottom: 0.9rem; padding-left: 1.5rem; }
+  .content li { margin-bottom: 0.3rem; }
+
+  /* ---- Resource Cards ---- */
+  .res-list { list-style: none; padding: 0 !important; margin-bottom: 1.25rem; }
+  .res-list li {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.9rem 1.1rem; margin-bottom: 0.6rem;
+    display: flex; align-items: flex-start; gap: 0.75rem;
+  }
+  .res-list li .tag {
+    flex-shrink: 0; display: inline-block; font-size: 0.7rem;
+    font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px;
+    white-space: nowrap; margin-top: 0.15rem;
+  }
+  .tag-yt { background: #fef2f2; color: #dc2626; }
+  .tag-course { background: #ecfeff; color: #0891b2; }
+  .tag-book { background: #f5f3ff; color: #7c3aed; }
+  .tag-doc { background: #fffbeb; color: #d97706; }
+  .tag-cert { background: #f0fdf4; color: #16a34a; }
+  .res-list li .info { flex: 1; }
+  .res-list li .info strong { display: block; font-size: 0.95rem; }
+  .res-list li .info .meta { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.15rem; }
+  .res-list li .info .desc { font-size: 0.88rem; margin-top: 0.3rem; color: var(--text); }
+  .res-list li a { color: var(--primary); text-decoration: none; font-weight: 500; }
+  .res-list li a:hover { text-decoration: underline; }
+
+  /* ---- Domain section ---- */
+  .domain-header {
+    display: flex; align-items: center; gap: 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+  .domain-header .domain-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+
+  /* ---- Path mapping ---- */
+  .path-map { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .path-map table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .path-map th, .path-map td { padding: 0.4rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); }
+  .path-map th { background: #f1f5f9; font-weight: 600; font-size: 0.82rem; }
+  .path-map td:first-child { font-weight: 600; white-space: nowrap; }
+  .project-ref { font-size: 0.82rem; color: var(--text-muted); }
+
+  /* ---- Tags & badges ---- */
+  .badge { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 600; margin-right: 0.25rem; }
+  .badge-free { background: #f0fdf4; color: #16a34a; }
+  .badge-paid { background: #fef2f2; color: #dc2626; }
+  .badge-mixed { background: #fffbeb; color: #d97706; }
+
+  .yt-badge { display: inline-flex; align-items: center; gap: 0.3rem; background: #fef2f2; color: #dc2626; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+
+  @media (max-width: 860px) {
+    .wrapper { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border); padding: 1rem; }
+    .sidebar nav { display: none; }
+    .content { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!--- ==================== SIDEBAR ==================== -->
+<aside class="sidebar">
+  <div class="logo">
+    🚗 Auto SW Academy
+    <small>학습 자료 추천</small>
+  </div>
+  <h2>목차</h2>
+  <nav>
+    <a href="#intro">소개</a>
+    <a href="#path">학습 경로 매핑</a>
+    <a href="#domain-ec">1. 임베디드 C</a>
+    <a href="#domain-autosar">2. AUTOSAR Classic</a>
+    <a href="#domain-can">3. CAN / ISO-TP</a>
+    <a href="#domain-uds">4. UDS 진단</a>
+    <a href="#domain-safety">5. 기능안전 (ISO 26262)</a>
+    <a href="#domain-security">6. 보안 (SecOC/AES)</a>
+    <a href="#domain-aspice">7. ASPICE / 프로세스</a>
+    <a href="#youtube-channels">8. 추천 YouTube 채널</a>
+    <a href="#books">9. 추천 도서</a>
+    <a href="#cert">10. 자격증</a>
+    <a href="#ref">11. 공식 표준 문서</a>
+    <a href="#study-tips">12. 학습 로드맵 조언</a>
+  </nav>
+</aside>
+
+<!--- ==================== CONTENT ==================== -->
+<main class="content">
+
+<h1 id="intro">Auto SW Academy — 학습 자료 추천</h1>
+
+<p>
+  이 가이드는 Auto SW Academy 프로젝트의 각 학습 영역(임베디드 C, AUTOSAR, CAN 통신,
+  UDS 진단, 기능안전, 보안, ASPICE)에 대한 최신 강좌, 유튜브 재생목록, 도서, 공식 문서를
+  정리합니다. 모든 자료는 <strong>실무 적용 관점</strong>에서 선별했습니다.
+</p>
+
+<div style="background: var(--primary-light); border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: 0 6px 6px 0; margin-bottom: 1.5rem;">
+  <strong>학습 순서 팁:</strong> (1) 임베디드 C 기초 → (2) AUTOSAR 구조 이해 →
+  (3) CAN/ISO-TP 프로토콜 → (4) UDS 진단 → (5) 기능안전 + 보안 → (6) ASPICE 프로세스.
+  이 순서가 Auto SW Academy의 EX1→EX4 구성과 정확히 일치합니다.
+</div>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2 id="path">학습 경로 매핑</h2>
+
+<div class="path-map">
+<table>
+  <tr><th>단계</th><th>프로젝트</th><th>학습 영역</th><th>추천 학습 순서</th></tr>
+  <tr>
+    <td>1단계</td>
+    <td class="project-ref">EX1 (embedded_c)</td>
+    <td>C 언어 심화, 비트연산, 레지스터, 링버퍼, 상태기계, <strong>C++ 템플릿/OOP/RAII</strong></td>
+    <td>① C 복습 → ② 임베디드 C 과정</td>
+  </tr>
+  <tr>
+    <td>2단계</td>
+    <td class="project-ref">EX2 (mini AUTOSAR)</td>
+    <td>AUTOSAR Classic 계층 구조, MCAL/BSW/RTE/SWC</td>
+    <td>③ AUTOSAR 개요 → ④ 계층별 학습</td>
+  </tr>
+  <tr>
+    <td>3단계</td>
+    <td class="project-ref">EX3 (comm_diag)</td>
+    <td>CAN 프로토콜, ISO-TP, UDS 진단 서비스</td>
+    <td>⑤ CAN 기초 → ⑥ ISO-TP → ⑦ UDS 심화</td>
+  </tr>
+  <tr>
+    <td>4단계</td>
+    <td class="project-ref">EX4 (safety_security)</td>
+    <td>ISO 26262, E2E, SecOC, WdgM, ASPICE</td>
+    <td>⑧ ISO 26262 → ⑨ 보안 → ⑩ ASPICE</td>
+  </tr>
+</table>
+</div>
+
+<hr>
+<!-- ============================================================ -->
+
+<!-- ======================== 1. EMBEDDED C ======================= -->
+<h2 id="domain-ec">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#e8effd;">⚡</span>
+    1. 임베디드 C / C++ for Automotive
+  </span>
+</h2>
+
+<ul class="res-list">
+  <li>
+    <span class="tag tag-yt">YouTube</span>
+    <div class="info">
+      <strong><a href="https://youtube.com/playlist?list=PLBlnK6fEyqRhX6r2uhhlubuF5QextdCSM" target="_blank">Embedded C Programming (Neso Academy)</a></strong>
+      <div class="meta">Neso Academy · 재생목록</div>
+      <div class="desc">임베디드 C 핵심 개념을 체계적으로 설명. 포인터, volatile, 비트 조작, 인터럽트 핸들러 패턴 등 자동차 SW에 필수적인 저수준 개념 포함.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Udemy</span>
+    <div class="info">
+      <strong><a href="https://www.udemy.com/course/embedded-c-for-automotive/" target="_blank">Embedded C for Automotive</a></strong>
+      <div class="meta">Thaminmun Ansari S · 4.3점</div>
+      <div class="desc">자동차 SW에 특화된 임베디드 C 과정. CAN, SPI, I2C 드라이버, UDS 진단 레이어, 센서 인터페이싱을 자동차 맥락에서 학습.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-paid">유료</span></div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Coursera</span>
+    <div class="info">
+      <strong><a href="https://www.coursera.org/learn/introduction-to-automotive-embedded-systems" target="_blank">Introduction to Automotive Embedded Systems</a></strong>
+      <div class="meta">Starweaver · 초급자 대상</div>
+      <div class="desc">자동차 임베디드 시스템의 전체 그림: 마이크로컨트롤러, 소프트웨어 개발, 센서 통합, 실사례. Auto SW Academy의 EX1 전 단계로 적합.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-mixed">무료/유료</span> <span class="badge badge-free">재정지원 가능</span></div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-yt">YouTube</span>
+    <div class="info">
+      <strong><a href="https://youtube.com/playlist?list=PL6PplMTH29SHgRPDufZhfMRoFwRApEHk0" target="_blank">C 언어 포인터 완벽 정리</a></strong>
+      <div class="meta">다양한 제작자 · 무료</div>
+      <div class="desc">자동차 SW에서 포인터/배열/구조체는 MCAL 레지스터 맵 접근의 핵심. EX1의 register_map 실습과 직접 연결.</div>
+    </div>
+  </li>
+</ul>
+
+  <h3>C++ for Embedded</h3>
+  <ul class="res-list">
+    <li>
+      <span class="tag tag-yt">YouTube</span>
+      <div class="info">
+        <strong><a href="https://youtube.com/playlist?list=PL43pGnJiVbSSiPrE0a4QIJjjqMUx7cJ48" target="_blank">C++ for Embedded Systems (Modern C++ in Embedded)</a></strong>
+        <div class="meta">YouTube 재생목록</div>
+        <div class="desc">C++11/14/17의 임베디드 활용: constexpr, 템플릿 메타프로그래밍, RAII, move semantics. Auto SW Academy의 ex1_6~ex1_8 C++ 예제와 직접 연결.</div>
+      </div>
+    </li>
+    <li>
+      <span class="tag tag-course">Udemy</span>
+      <div class="info">
+        <strong><a href="https://www.udemy.com/course/cpp-embedded-systems/" target="_blank">C++ for Embedded Systems</a></strong>
+        <div class="meta">Udemy · 실무 중심</div>
+        <div class="desc">임베디드 시스템에서의 C++ 활용: 레지스터 매핑, 템플릿 기반 드라이버, 정적 할당 패턴, 인터럽트 핸들러에서의 C++ 적용법.</div>
+        <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-paid">유료</span></div>
+      </div>
+    </li>
+  </ul>
+
+  <h3>STM32 보드 실습</h3>
+  <ul class="res-list">
+    <li>
+      <span class="tag tag-yt">YouTube</span>
+      <div class="info">
+        <strong><a href="https://youtube.com/playlist?list=PL6PplMTH29SHgRPDufZhfMRoFwRApEHk0v" target="_blank">STM32 HAL &amp; CubeMX Tutorial</a></strong>
+        <div class="meta">YouTube · STM32 입문</div>
+        <div class="desc">STM32CubeMX 설정, HAL 드라이버, GPIO/UART/ADC/CAN 주변장치 실습. Auto SW Academy의 MCAL(SimMcu)을 실제 STM32 하드웨어로 포팅할 때 참고.</div>
+      </div>
+    </li>
+    <li>
+      <span class="tag tag-course">Udemy</span>
+      <div class="info">
+        <strong><a href="https://www.udemy.com/course/mastering-microcontroller-with-peripheral-driver-development/" target="_blank">Mastering Microcontroller: STM32 Peripheral Drivers</a></strong>
+        <div class="meta">Udemy · 베스트셀러 · 4.5점</div>
+        <div class="desc">STM32F4 레지스터 수준 드라이버 개발. GPIO, CAN, SPI, I2C, DMA. Auto SW Academy의 가상 MCAL을 실제 하드웨어로 대체할 때 필요한 지식.</div>
+        <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-paid">유료</span></div>
+      </div>
+    </li>
+    <li>
+      <span class="tag tag-doc">문서</span>
+      <div class="info">
+        <strong><a href="https://www.st.com/en/microcontrollers-microprocessors/stm32f4-series.html" target="_blank">STM32F4 Reference Manual (RM0090)</a></strong>
+        <div class="meta">ST · 공식 문서</div>
+        <div class="desc">STM32F40x/41x 레퍼런스 매뉴얼. 메모리 맵, 레지스터 설명, CAN 컨트롤러(bxCAN) 설정. Auto SW Academy porting/stm32/의 공식 참조 자료.</div>
+      </div>
+    </li>
+  </ul>
+
+<div style="margin-bottom: 1.5rem;">
+  <h3>보조 자료</h3>
+  <ul>
+    <li><a href="https://www.embedded.com/" target="_blank">Embedded.com</a> — 임베디드 C 모범 사례 기사</li>
+    <li><a href="https://barrgroup.com/embedded-systems/books/programming-embedded-c" target="_blank">Programming Embedded Systems (Barr &amp; Massa)</a> — 고전 교재, 온라인 무료</li>
+    <li><a href="https://www.classcentral.com/subject/embedded-c" target="_blank">Class Central Embedded C Courses</a> — 9개 무료 과정 모음</li>
+  </ul>
+</div>
+
+<hr>
+<!-- ======================== 2. AUTOSAR ======================= -->
+<h2 id="domain-autosar">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#ecfeff;">🏗️</span>
+    2. AUTOSAR Classic Platform
+  </span>
+</h2>
+
+<ul class="res-list">
+  <li>
+    <span class="tag tag-yt">YouTube</span>
+    <div class="info">
+      <strong><a href="https://www.youtube.com/playlist?list=PLcbIZiT62e1iAfd0kmOilSAbGhePsgURy" target="_blank">AUTOSAR Tutorial for Beginners</a></span></strong>
+      <div class="meta">재생목록 · AUTOSAR Foundation부터 BSW 계층까지</div>
+      <div class="desc">AUTOSAR의 등장 배경, 계층 구조, 포트/인터페이스, 러너블, COM 스택 전반을 커버. EX2의 AUTOSAR 개념과 직접 연결.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-yt">YouTube</span>
+    <div class="info">
+      <strong><a href="https://www.youtube.com/playlist?list=PLbsTF70txcGearJXWQ6xAAXdBbUVZNakd" target="_blank">AUTOSAR Classic Platform (R19-11) — 공식</a></strong>
+      <div class="meta">AUTOSAR 공식 YouTube · R19-11 기준</div>
+      <div class="desc">AUTOSAR 컨소시엄이 직접 제작한 공식 학습 비디오. ECU 추상화 계층, RTE, BSW 모듈 설명. 가장 권위 있는 자료.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Udemy</span>
+    <div class="info">
+      <strong><a href="https://www.udemy.com/course/autosar-architecture-learn-from-scratch-with-demo/" target="_blank">Autosar Architecture (Learn from Scratch with Demo)</a></strong>
+      <div class="meta">Prakash Kumar · 4.4점 · 9,477명 수강 · 베스트셀러</div>
+      <div class="desc">AUTOSAR Classic Architecture를 처음부터 라이브 데모와 함께 학습. SWC 설계, BSW 설정, ARXML, RTE 생성까지 실습.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-paid">유료</span></div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Coursera</span>
+    <div class="info">
+      <strong><a href="https://www.coursera.org/learn/introduction-to-autosar" target="_blank">Introduction to AutoSAR</a></strong>
+      <div class="meta">EDUCBA · 4.6점 · 약 7시간</div>
+      <div class="desc">AUTOSAR 프레임워크 전반, RTE, Sender-Receiver / Client-Server 통신, MCAL, ARXML 설정 포맷을 포괄적으로 다룸.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-mixed">무료/유료</span></div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-yt">YouTube</span>
+    <div class="info">
+      <strong><a href="https://www.youtube.com/playlist?list=PLLKv-zcGiHJH94c1Qhb4UUZ6exYKBJhac" target="_blank">DaVinci Developer Playlist (Vector)</a></strong>
+      <div class="meta">Vector · AUTOSAR 툴체인</div>
+      <div class="desc">실무에서 가장 널리 쓰이는 AUTOSAR 저작 도구인 DaVinci Developer와 Configurator 사용법. 무료.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">자료</span>
+    <div class="info">
+      <strong><a href="https://www.autosar.org/standards/classic-platform" target="_blank">AUTOSAR Classic Platform — 공식 사양</a></strong>
+      <div class="meta">AUTOSAR.org · R25-11 최신</div>
+      <div class="desc">AUTOSAR 공식 표준 문서 (PDF). SWS_COM, SWS_CAN, SWS_DCM 등 각 모듈별 상세 규격. 실무에서 가장 많이 참조하는 1차 자료.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">자료</span>
+    <div class="info">
+      <strong><a href="https://autombedded.com/autosar/autosar-classic/" target="_blank">AutoMbedded — AUTOSAR Classic Tutorials</a></strong>
+      <div class="meta">블로그 · 단계별 튜토리얼</div>
+      <div class="desc">AUTOSAR Classic을 단계별로 설명하는 블로그. 초보자 친화적 설명과 그림 포함.</div>
+    </div>
+  </li>
+</ul>
+
+<hr>
+<!-- ======================== 3. CAN / ISO-TP ======================= -->
+<h2 id="domain-can">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#fef2f2;">🔌</span>
+    3. CAN Bus &amp; ISO-TP (ISO 15765-2)
+  </span>
+</h2>
+
+<ul class="res-list">
+  <li>
+    <span class="tag tag-yt">YouTube</span>
+    <div class="info">
+      <strong>CAN Protocol Explained — 여러 재생목록</strong>
+      <div class="meta">다양한 제작자</div>
+      <div class="desc">"CAN bus", "CAN protocol tutorial" 검색. CAN 프레임 구조, 중재, 비트 타이밍, 에러 처리의 기초는 YouTube 무료 자료로 충분.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="yt-badge">▶️ 무료</span></div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Udemy</span>
+    <div class="info">
+      <strong><a href="https://www.udemy.com/course/mastering-can-can-fd-can-tp-uds-auto-comms-diagnostics/" target="_blank">Mastering CAN, CAN-FD, CAN TP &amp; UDS</a></strong>
+      <div class="meta">Techy Chariots · 4.4점 · 3.5시간</div>
+      <div class="desc">CAN, CAN FD, ISO-TP(15765-2), UDS를 한 코스에서 커버. 로그 분석 실습 포함. EX3의 can_signal + isotp + uds 내용과 정확히 일치.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-paid">유료</span></div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Udemy</span>
+    <div class="info">
+      <strong><a href="https://www.udemy.com/course/can-iso-tp-the-complete-guide-for-embedded-engineers/" target="_blank">CAN ISO-TP: The Complete Guide for Embedded Engineers</a></strong>
+      <div class="meta">프로토콜 분석 중심</div>
+      <div class="desc">ISO 15765-2 전송 프로토콜의 세그멘테이션, 플로우 컨트롤, 타이밍을 집중 학습. SF/FF/FC/CF 프레임 타입별 분석.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">튜토리얼</span>
+    <div class="info">
+      <strong><a href="https://www.csselectronics.com/pages/can-bus-simple-intro-tutorial" target="_blank">CAN Bus Explained — Simple Intro (CSS Electronics)</a></strong>
+      <div class="meta">CAN 기초부터 DBC 디코드까지</div>
+      <div class="desc">CAN bus의 가장 읽기 쉬운 입문서. DBC 파일, ISO-TP, CAN FD, 실제 로그 예제 포함. Auto SW Academy trace-check 개념과 직결.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">튜토리얼</span>
+    <div class="info">
+      <strong><a href="https://www.csselectronics.com/pages/uds-protocol-tutorial-unified-diagnostic-services" target="_blank">UDS Explained — Simple Intro + ISO-TP 영역</a></strong>
+      <div class="meta">무료 · 시각화 잘됨</div>
+      <div class="desc">ISO-TP SF/FF/FC/CF 구조를 그림으로 상세 설명. UDS와 OBD2의 차이, CAN FD에서의 동작 포함.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Vector</span>
+    <div class="info">
+      <strong><a href="https://academy.vector.com/de/en/courses/detail/3384/diagnostics-uds" target="_blank">Diagnostics UDS — Vector Academy</a></strong>
+      <div class="meta">Vector · Auto SW Academy 협력사</div>
+      <div class="desc">Vector Academy의 정규 진단 과정. AUTOSAR DCM/DEM과 UDS의 연계를 실무 관점에서 학습. 실무자 필수.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-paid">유료</span></div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Udemy</span>
+    <div class="info">
+      <strong><a href="https://www.udemy.com/course/autosar-diagnostics/" target="_blank">AUTOSAR DIAGNOSTICS (DEM, DCM, OBD, UDS, DOIP)</a></strong>
+      <div class="meta">Autosar Instructor · 4.4점 · 7시간</div>
+      <div class="desc">AUTOSAR 진단 스택 완전 정복: DEM/DCM 아키텍처, UDS 서비스 상세, OBD, DoIP. EX3 UDS 파트와 직접 연결.</div>
+    </div>
+  </li>
+</ul>
+
+<hr>
+<!-- ======================== 4. UDS ======================= -->
+<h2 id="domain-uds">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#fffbeb;">🔍</span>
+    4. UDS 진단 프로토콜 (ISO 14229)
+  </span>
+</h2>
+
+<ul class="res-list">
+  <li>
+    <span class="tag tag-yt">YouTube</span>
+    <div class="info">
+      <strong>UDS Protocol Tutorial / Diagnostics — 여러 채널</strong>
+      <div class="meta">검색: "UDS ISO 14229 tutorial"</div>
+      <div class="desc">20~30분 분량의 무료 UDS 개요 영상 다수. SID(0x10~0x3E), NRC, 세션/보안/루틴 개념을 시각적으로 학습.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="yt-badge">▶️ 무료</span></div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Motodemy</span>
+    <div class="info">
+      <strong><a href="https://motodemy.com/learn/diagnostics" target="_blank">UDS Diagnostics Mastery</a></strong>
+      <div class="meta">32챕터 · 25시간 독서 · 6모듈</div>
+      <div class="desc">가장 체계적인 UDS 온라인 과정. 모든 UDS 서비스를 요청/응답 예제와 함께 학습. SecurityAccess, DTC, RoutineControl, ECU Programming 포함.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-paid">유료</span></div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">문서</span>
+    <div class="info">
+      <strong><a href="https://www.aertrixlabs.com/courses/uds-diagnostics-masterclass" target="_blank">Aertrix Labs — UDS Diagnostics Masterclass</a></strong>
+      <div class="meta">자동차 엔지니어가 만든 교육</div>
+      <div class="desc">CAN, AUTOSAR, UDS, ADAS에 특화된 실무 과정. OEM과 Tier-1의 실제 진단 워크플로 반영.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">블로그</span>
+    <div class="info">
+      <strong><a href="https://www.embitel.com/blog/embedded-blog/decoding-the-implementation-of-uds-vehicle-diagnostics-in-autosar-base-software-module" target="_blank">UDS in AUTOSAR BSW — Embitel 블로그</a></strong>
+      <div class="meta">기술 심층 분석</div>
+      <div class="desc">AUTOSAR BSW에서 DCM/DEM/FIM이 UDS를 어떻게 구현하는지 상세 분석. ARXML, DEXT 포맷, CANdelaStudio 연계 설명.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">레퍼런스</span>
+    <div class="info">
+      <strong><a href="https://uds.readthedocs.io/" target="_blank">py-uds Documentation</a></strong>
+      <div class="meta">Python 기반 UDS 라이브러리 문서</div>
+      <div class="desc">ISO 14229, ISO 15765-2, ISO 13400(DoIP)의 지식베이스로도 활용 가능. 진단 요청/응답 예제, 세그멘테이션 설명.</div>
+    </div>
+  </li>
+</ul>
+
+<hr>
+<!-- ======================== 5. ISO 26262 ======================= -->
+<h2 id="domain-safety">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#f0fdf4;">🛡️</span>
+    5. 기능안전 — ISO 26262
+  </span>
+</h2>
+
+<ul class="res-list">
+  <li>
+    <span class="tag tag-course">Udemy</span>
+    <div class="info">
+      <strong><a href="https://www.udemy.com/course/iso-26262-crash-course/" target="_blank">ISO 26262 Crash Course: Functional Safety Mastery</a></strong>
+      <div class="meta">Paul Danci · 4.5점 · 20,374명 · 베스트셀러</div>
+      <div class="desc">15년 경력 Functional Safety Manager의 실무 중심 과정. HARA, ASIL, FMEDA, 하드웨어 메트릭스, Safety Culture. Auto SW Academy E2E/WdgM의 이론적 배경.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-paid">유료</span></div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Udemy</span>
+    <div class="info">
+      <strong><a href="https://www.udemy.com/course/iso26262/" target="_blank">ISO 26262: Automotive Functional Safety Crash-Course 2026</a></strong>
+      <div class="meta">Nico Ploen · 4.5점</div>
+      <div class="desc">HARA 수행, ASIL 도출, FMEDA 계산, 안전 개발 수명주기 전체를 압축. 실무 프로젝트 진입 전 개요 파악에 최적.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-cert">자격증</span>
+    <div class="info">
+      <strong><a href="https://www.tuvsud.com/en-us/store/academy-us/transportation-industry/safety/510-03-auto-1001" target="_blank">TÜV SÜD — Functional Safety Engineer (ISO 26262)</a></strong>
+      <div class="meta">공인 자격증 · Level 1/2/3</div>
+      <div class="desc">ISO 26262 분야에서 가장 인정받는 자격증. Level 1(FSE)은 기본 지식 평가, Level 2(FSP)는 실무 경험 필요. 오프라인/온라인 시험.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-cert">자격증</span>
+    <div class="info">
+      <strong><a href="https://www.ul.com/sis/training/ul-certified-functional-safety-professional-training-automotive-iso-26262" target="_blank">UL Certified Functional Safety Professional</a></strong>
+      <div class="meta">UL Solutions · 4일 과정</div>
+      <div class="desc">ISO 26262:2018 전면 개정판 기준. 가상/오프라인 과정, 서울 과정 있음(₩2,300,000).</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-cert">자격증</span>
+    <div class="info">
+      <strong><a href="https://consulting.vector.com/int/en/trainings/safety-26262/" target="_blank">Vector Consulting — ISO 26262 Functional Safety Training</a></strong>
+      <div class="meta">Vector · 3일 · 약 €1,150</div>
+      <div class="desc">Vector의 OEM/공급업체 컨설팅 경험을 기반으로 한 실무 교육. FMEA/FTA/FMEDA 실습 포함. 온라인 과정 정기 개설.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-yt">YouTube</span>
+    <div class="info">
+      <strong>ISO 26262 Playlist (검색)</strong>
+      <div class="meta">"ISO 26262 explained", "ASIL determination"</div>
+      <div class="desc">기능안전 개념을 시각적으로 이해하는 데 유용. ASIL(A/B/C/D) 등급 결정, HARA 예제, 안전 메커니즘.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="yt-badge">▶️ 무료</span></div>
+    </div>
+  </li>
+</ul>
+
+<hr>
+<!-- ======================== 6. SECURITY ======================= -->
+<h2 id="domain-security">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#f5f3ff;">🔐</span>
+    6. 자동차 보안 — SecOC / AES / ISO 21434
+  </span>
+</h2>
+
+<ul class="res-list">
+  <li>
+    <span class="tag tag-yt">YouTube</span>
+    <div class="info">
+      <strong>AES / Cryptography Playlist</strong>
+      <div class="meta">검색: "AES explained" "CMAC tutorial"</div>
+      <div class="desc">AES-128 알고리즘 내부(SubBytes, ShiftRows, MixColumns), CMAC 작동 원리. EX4 secoc 모듈의 암호 기초를 다지는 데 필수.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">블로그</span>
+    <div class="info">
+      <strong>AUTOSAR SecOC 설명 — EMBITEL / Vector 블로그</strong>
+      <div class="meta">검색: "AUTOSAR SecOC explained"</div>
+      <div class="desc">SecOC의 신선도 카운터(freshness), MAC 계산, PDU 인증 프로세스를 상세히 설명. EX4 secoc.c 구현의 배경 이론.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">표준</span>
+    <div class="info">
+      <strong>ISO 21434 — Road Vehicle Cybersecurity Engineering</strong>
+      <div class="meta">국제 표준</div>
+      <div class="desc">자동차 사이버보안 엔지니어링 표준. UN R155(규제)와 짝을 이룸. TARA(Threat Analysis and Risk Assessment) 방법론 포함.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-course">Coursera</span>
+    <div class="info">
+      <strong><a href="https://www.coursera.org/learn/introduction-to-automotive-embedded-systems" target="_blank">Intro to Automotive Cybersecurity &amp; Vehicle Networks</a></strong>
+      <div class="meta">Starweaver</div>
+      <div class="desc">자동차 사이버보안 개요, 위협 모델링, 보안 메커니즘을 자동차 네트워크 맥락에서 학습.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-book">도서</span>
+    <div class="info">
+      <strong>Understanding Cryptography (C. Paar, J. Pelzl)</strong>
+      <div class="meta">Springer · 교과서</div>
+      <div class="desc">AES, CMAC의 수학적 기초를 가장 명확하게 설명하는 교재. EX4 AES-mini/cmac 코드의 이론적 배경.</div>
+    </div>
+  </li>
+</ul>
+
+<hr>
+<!-- ======================== 7. ASPICE ======================= -->
+<h2 id="domain-aspice">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#fef2f2;">📋</span>
+    7. ASPICE / 프로세스
+  </span>
+</h2>
+
+<ul class="res-list">
+  <li>
+    <span class="tag tag-course">Coursera</span>
+    <div class="info">
+      <strong>Overview of Automotive SPICE (EDUCBA)</strong>
+      <div class="meta">4.5점</div>
+      <div class="desc">ASPICE의 6개 프로세스 그룹(SWE.1~SWE.6), 능력도 레벨(0~5), 평가 방법을 개괄.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">가이드</span>
+    <div class="info">
+      <strong>Automotive SPICE Process Assessment Model (PAM)</strong>
+      <div class="meta">VDA QMC · 공식 문서</div>
+      <div class="desc">ASPICE 심사의 공식 기준. SWE.1~SWE.6의 Base Practice, Work Product, 평가 기준 명시. Auto SW Academy의 ASPICE 태그 규칙 이해에 필수.</div>
+      <div class="meta" style="margin-top: 0.2rem;"><span class="badge badge-paid">유료</span> (개인 구매 가능)</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">블로그</span>
+    <div class="info">
+      <strong>ASPICE and ISO 26262 — Embitel</strong>
+      <div class="meta">무료</div>
+      <div class="desc">ASPICE와 ISO 26262가 실제 프로젝트에서 어떻게 상호 보완되는지 설명. SRS↔함수↔TC 추적성 체인의 실무 예시.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">블로그</span>
+    <div class="info">
+      <strong>PTC — A Comprehensive Guide to Automotive SPICE</strong>
+      <div class="meta">무료 PDF 다운로드</div>
+      <div class="desc">ASPICE Level 3 달성을 위한 실용 가이드. 요구사항 관리, 아키텍처 설계, 단위 테스트, 통합 테스트의 ALM 도구 연계.</div>
+    </div>
+  </li>
+</ul>
+
+<hr>
+<!-- ======================== 8. YOUTUBE CHANNELS ======================= -->
+<h2 id="youtube-channels">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#fef2f2;">📺</span>
+    8. 추천 YouTube 채널 모음
+  </span>
+</h2>
+
+<ul class="res-list">
+  <li>
+    <span class="yt-badge">채널</span>
+    <div class="info">
+      <strong><a href="https://www.youtube.com/@AUTOSARofficial" target="_blank">AUTOSAR 공식 채널</a></strong>
+      <div class="meta">AUTOSAR 컨소시엄 운영</div>
+      <div class="desc">Classic/Adaptive 플랫폼 개요, 계층별 튜토리얼, 최신 릴리스 소개. 가장 권위 있는 소스.</div>
+    </div>
+  </li>
+  <li>
+    <span class="yt-badge">채널</span>
+    <div class="info">
+      <strong><a href="https://www.youtube.com/@Vectorsupply" target="_blank">Vector 공식 채널</a></strong>
+      <div class="meta">CANalyzer/CANoe/DaVinci 튜토리얼</div>
+      <div class="desc">AUTOSAR 툴체인(DaVinci), CANoe 분석, 진단 워크플로 실습. Auto SW Academy가 지향하는 '미니 CANoe 워크플로'의 실무 버전.</div>
+    </div>
+  </li>
+  <li>
+    <span class="yt-badge">채널</span>
+    <div class="info">
+      <strong><a href="https://www.youtube.com/@dspacechannel" target="_blank">dSPACE</a></strong>
+      <div class="meta">모델 기반 개발, AUTOSAR MBD</div>
+      <div class="desc">AUTOSAR와 모델 기반 개발(MBD)의 통합을 주제로 한 Learning Bits 시리즈. Simulink와 AUTOSAR SWC의 관계 이해.</div>
+    </div>
+  </li>
+  <li>
+    <span class="yt-badge">재생목록</span>
+    <div class="info">
+      <strong><a href="https://www.youtube.com/playlist?list=PLoiqjtgvXf9cXAN26-iCeTgJqllfAHaOp" target="_blank">Automotive Diploma — AUTOSAR Course (전체 재생목록)</a></strong>
+      <div class="meta">AUTOSAR Module: Lec 1~</div>
+      <div class="desc">AUTOSAR 아키텍처 강의를 처음부터 체계적으로 제공. 소프트웨어 설계 유형, AUTOSAR 필요성, 계층 구조 순서로 진행.</div>
+    </div>
+  </li>
+  <li>
+    <span class="yt-badge">채널</span>
+    <div class="info">
+      <strong><a href="https://www.youtube.com/@TheEngineeringMindset" target="_blank">The Engineering Mindset</a></strong>
+      <div class="meta">CAN bus 기초, 전자공학 기초</div>
+      <div class="desc">CAN bus 동작 원리를 알기 쉽게 애니메이션으로 설명. EX3 진입 전 CAN 기본 개념 학습에 최적.</div>
+    </div>
+  </li>
+  <li>
+    <span class="yt-badge">채널</span>
+    <div class="info">
+      <strong>CSS Electronics</strong>
+      <div class="meta">CAN bus / UDS / DBC 실습</div>
+      <div class="desc">CANedge 하드웨어로 실제 차량 데이터를 로깅하고 DBC 디코드하는 과정 시연. Auto SW Academy trace-check와 동일한 워크플로.</div>
+    </div>
+  </li>
+</ul>
+
+<hr>
+<!-- ======================== 9. BOOKS ======================= -->
+<h2 id="books">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#f5f3ff;">📚</span>
+    9. 추천 도서
+  </span>
+</h2>
+
+<ul class="res-list">
+  <li>
+    <span class="tag tag-book">AUTOSAR</span>
+    <div class="info">
+      <strong><a href="https://www.amazon.com/AUTOSAR-Fundamentals-Applications-Establishing-foundation/dp/1805120875" target="_blank">AUTOSAR Fundamentals and Applications</a></strong>
+      <div class="meta">Hossam Soffar · Packt · 2024.12 · 254p</div>
+      <div class="desc"><strong>최신 AUTOSAR 입문서 중 최고.</strong> BSW/RTE 통합, 통신/진단/보안/OS 스택을 12년 현업 경험자의 시각으로 설명. Auto SW Academy 전체 내용과 가장 잘匹配되는 단 한 권의 책.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-book">AUTOSAR</span>
+    <div class="info">
+      <strong>Handbook of AUTOSAR Embedded Systems and Platforms</strong>
+      <div class="meta">여러 저자</div>
+      <div class="desc">AUTOSAR의 전반적 아키텍처와 실제 플랫폼 구현을 종합적으로 다룸. 다소 무겁지만 참고서로 유용.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-book">임베디드</span>
+    <div class="info">
+      <strong>Programming Embedded Systems (O'Reilly)</strong>
+      <div class="meta">Barr &amp; Massa</div>
+      <div class="desc">임베디드 C의 고전. 짧고(200쪽 미만) 실용적. 레지스터 조작, 인터럽트, 타이머, 메모리 맵 — EX1의 모든 주제를 다룸.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-book">임베디드</span>
+    <div class="info">
+      <strong>Automotive Embedded Systems Handbook (CRC Press)</strong>
+      <div class="meta">Nicolas Navet 외</div>
+      <div class="desc">자동차 임베디드 시스템 전반의 레퍼런스. AUTOSAR, FlexRay, CAN, 진단, 실시간 스케줄링을 망라적 기술.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-book">CAN</span>
+    <div class="info">
+      <strong>CANbus — The Ultimate Guide (CSS Electronics, 무료 PDF)</strong>
+      <div class="meta">160+ 페이지 · 12개 챕터</div>
+      <div class="desc">CAN bus, DBC, ISO-TP, UDS, CAN FD, OBD2를 한 권에 정리한 무료 전자책. trace-check 경로의 완벽한 참고서.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-book">안전</span>
+    <div class="info">
+      <strong>Automotive Software Architectures (M. H. E. Khalil)</strong>
+      <div class="meta">Springer</div>
+      <div class="desc">자동차 SW 아키텍처와 ISO 26262 기능안전을 연계하여 설명. SWE.1~SWE.6 프로세스와의 관계 포함.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-book">암호</span>
+    <div class="info">
+      <strong>Understanding Cryptography (C. Paar, J. Pelzl)</strong>
+      <div class="meta">Springer · 표준 교과서</div>
+      <div class="desc">AES, CMAC의 수학적 기초. EX4 secoc 모듈의 배경 이론. 온라인 강의도 무료 제공.</div>
+    </div>
+  </li>
+</ul>
+
+<hr>
+<!-- ======================== 10. CERTIFICATION ======================= -->
+<h2 id="cert">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#f0fdf4;">🎓</span>
+    10. 자격증 / 공인 교육
+  </span>
+</h2>
+
+<table>
+  <tr><th>자격증</th><th>발행 기관</th><th>비용</th><th>비고</th></tr>
+  <tr>
+    <td>Functional Safety Engineer (ISO 26262)</td>
+    <td>TÜV SÜD</td>
+    <td>~$1,600</td>
+    <td>자동차 기능안전 분야 최고 인지도. Level 1~3</td>
+  </tr>
+  <tr>
+    <td>Automotive Functional Safety Professional</td>
+    <td>SGS TÜV Saar</td>
+    <td>~€2,000</td>
+    <td>AFSP 인증. 온라인 과정</td>
+  </tr>
+  <tr>
+    <td>ISO 26262 Functional Safety (Vector)</td>
+    <td>Vector Consulting</td>
+    <td>€1,150</td>
+    <td>3일 집중 과정. FMEA/FMEDA 실습 포함</td>
+  </tr>
+  <tr>
+    <td>Certified AUTOSAR Engineer (준공식)</td>
+    <td>교육 기관별</td>
+    <td>다양</td>
+    <td>AUTOSAR 공식 자격증은 없으나 NobleProg/Embitel/Vector 등이 과정 제공</td>
+  </tr>
+  <tr>
+    <td>AUTOSAR Adaptive Training</td>
+    <td>Vector / dSPACE</td>
+    <td>다양</td>
+    <td>Adaptive Platform 전환 준비 과정</td>
+  </tr>
+  <tr>
+    <td>Certified Tester Automotive SW (ISTQB)</td>
+    <td>ISTQB</td>
+    <td>~$500</td>
+    <td>자동차 SW 테스팅 자격증 (ASPICE 맥락)</td>
+  </tr>
+</table>
+
+<hr>
+<!-- ======================== 11. STANDARDS ======================= -->
+<h2 id="ref">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#fffbeb;">📄</span>
+    11. 공식 표준 문서 (1차 자료)
+  </span>
+</h2>
+
+<p>Auto SW Academy 학습을 마친 후 실제 업무에서 참조할 표준 문서들입니다.</p>
+
+<ul class="res-list">
+  <li>
+    <span class="tag tag-doc">AUTOSAR</span>
+    <div class="info">
+      <strong><a href="https://www.autosar.org/standards/classic-platform" target="_blank">AUTOSAR SWS_COM, SWS_CAN, SWS_DCM, SWS_OS</a></strong>
+      <div class="meta">AUTOSAR.org · Classic Platform R25-11</div>
+      <div class="desc">각 BSW 모듈의 상세 규격. 통신 스택(Com/CanIf/PduR), 진단(DCM/DEM), 운영체제(OS)의 소프트웨어 요구사항 명시.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">통신</span>
+    <div class="info">
+      <strong>ISO 11898-1 / -2 — CAN Protocol</strong>
+      <div class="meta">국제 표준</div>
+      <div class="desc">CAN 버스의 데이터 링크 계층과 물리 계층 규격. EX3 CAN 신호의 근간.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">통신</span>
+    <div class="info">
+      <strong>ISO 15765-1 / -2 / -3 — DoCAN / ISO-TP</strong>
+      <div class="meta">국제 표준</div>
+      <div class="desc">Part 1: 일반 정보, Part 2: 전송 프로토콜(ISO-TP: SF/FF/FC/CF), Part 3: UDSonCAN 구현. EX3 isotp + uds의 표준.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">진단</span>
+    <div class="info">
+      <strong>ISO 14229-1 / -2 / -3 — UDS</strong>
+      <div class="meta">국제 표준</div>
+      <div class="desc">Part 1: UDS 애플리케이션 계층(서비스, NRC), Part 2: 세션 계층, Part 3: UDSonCAN. EX3 UDS 서버의 완전한 명세.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">안전</span>
+    <div class="info">
+      <strong>ISO 26262:2018 — Road Vehicles — Functional Safety</strong>
+      <div class="meta">국제 표준 · 12 Parts</div>
+      <div class="desc">Part 1~12(어휘, 관리, HARA, 시스템/하드웨어/소프트웨어 개발, ASIL, FMEDA 등). EX4 E2E/WdgM/ASPICE의 근간.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">보안</span>
+    <div class="info">
+      <strong>ISO 21434:2021 — Road Vehicle Cybersecurity</strong>
+      <div class="meta">국제 표준</div>
+      <div class="desc">차량 사이버보안 엔지니어링 표준. SecOC, 키 관리, TARA 방법론 포함. UN R155 규제 대응 필수.</div>
+    </div>
+  </li>
+  <li>
+    <span class="tag tag-doc">품질</span>
+    <div class="info">
+      <strong>Automotive SPICE (ISO 33061 + VDA Scope)</strong>
+      <div class="meta">VDA QMC</div>
+      <div class="desc">SWE.1~SWE.6 프로세스 평가 모델. Auto SW Academy의 SRS/TC 태그 규칙은 이 표준에서 파생.</div>
+    </div>
+  </li>
+</ul>
+
+<hr>
+<!-- ======================== 12. STUDY TIPS ======================= -->
+<h2 id="study-tips">
+  <span class="domain-header">
+    <span class="domain-icon" style="background:#e8effd;">🧭</span>
+    12. 학습 로드맵 조언
+  </span>
+</h2>
+
+<div class="path-map" style="margin-bottom: 1rem;">
+  <h3 style="margin-top: 0; border: none; font-size: 1rem;">초보자 → 3개월 로드맵</h3>
+  <table>
+    <tr><th>주차</th><th>학습</th><th>프로젝트 연계</th></tr>
+    <tr><td>1~2주</td><td>C 복습 + 임베디드 C/C++ (포인터, volatile, 비트 조작, 템플릿, RAII)</td><td>EX1 빌드/테스트 통과 (C 5종 + C++ 3종)</td></tr>
+    <tr><td>3~4주</td><td>AUTOSAR 구조 (계층도, COM 스택, SWC/RTE)</td><td>EX2 signal_flow 이해</td></tr>
+    <tr><td>5~6주</td><td>CAN 프로토콜 + ISO-TP 프레임 분석</td><td>EX3 can_signal + isotp</td></tr>
+    <tr><td>7~8주</td><td>UDS 진단 서비스 (SID별 요청/응답)</td><td>EX3 uds 전체 서비스 실습</td></tr>
+    <tr><td>9~10주</td><td>기능안전 기초 (HARA, ASIL) + E2E</td><td>EX4 crc_e2e + wdg</td></tr>
+    <tr><td>11~12주</td><td>보안(AES/CMAC/SecOC) + Capstone 통합</td><td>EX4 secoc + capstone_demo</td></tr>
+  </table>
+</div>
+
+<div style="background: var(--primary-light); padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
+  <h3 style="margin-top: 0; border: none;">🎯 현업 적용 팁</h3>
+  <ul>
+    <li><strong>AUTOSAR는 이론보다 설정(configuration)이 실제 업무의 80%</strong>입니다. DaVinci Configurator / EB tresos 스크린캐스트를 꼭 보세요.</li>
+    <li><strong>DBC 파일을 읽고 쓰는 것이 CAN 개발자의 기본 소양</strong>입니다. Auto SW Academy의 generated/VehicleNetwork.dbc를 CANoe/PCAN-View로 열어보세요.</li>
+    <li><strong>UDS 응답(NRC)의 의미를 외우지 말고 패턴을 이해하세요.</strong> 0x7F + SID + NRC. 모든 진단 도구는 이 패턴을 표시합니다.</li>
+    <li><strong>ISO 26262는 자격증보다 프로젝트 경험이 중요</strong>하지만, TÜV SÜD FSE 자격증은 서류 전형에서 가산점이 됩니다.</li>
+    <li><strong>GitHub Actions CI 로그는 포트폴리오의 일부</strong>입니다. make check 259/259 PASS 로그를 이력서에 링크하세요.</li>
+  </ul>
+</div>
+
+<hr>
+<footer style="margin-top: 3rem; color: var(--text-muted); font-size: 0.85rem; text-align: center;">
+  Auto SW Academy — 학습 자료 추천 &nbsp;|&nbsp;
+  <a href="user_guide.html">사용자 가이드</a> &nbsp;|&nbsp;
+  <a href="../README.md">README</a> &nbsp;|&nbsp;
+  마지막 업데이트: 2026.07
+</footer>
+
+</main>
+</div>
+</body>
+</html>
