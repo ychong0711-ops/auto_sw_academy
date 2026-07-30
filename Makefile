@@ -174,7 +174,7 @@ trace: $(TRACE)
 # 자동 검증: 두 디코드 엔진(cantools / stdlib) 출력이 같고, 기대 신호 값이 읽히는지 확인
 trace-check: $(BUILD)/capstone_demo
 	@mkdir -p logs
-	./	$(BUILD)/capstone_demo --trace $(TRACE) > logs/capstone_console.log
+	./$(BUILD)/capstone_demo --trace $(TRACE) > logs/capstone_console.log
 	$(PYTHON) tools/decode_trace.py          generated/VehicleNetwork.dbc $(TRACE) > logs/decoded_cantools.log
 	$(PYTHON) tools/decode_trace.py --stdlib generated/VehicleNetwork.dbc $(TRACE) > logs/decoded_stdlib.log
 	@if diff <(tail -n +2 logs/decoded_cantools.log) <(tail -n +2 logs/decoded_stdlib.log) > /dev/null; then \

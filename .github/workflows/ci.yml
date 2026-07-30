@@ -41,6 +41,8 @@ jobs:
         run: |
           # Windows has 'python' not 'python3' — tell Makefile to use it
           echo "PYTHON=python" >> $GITHUB_ENV
+          # Windows cp1252 cannot encode Korean chars in gen_cfg.py
+          echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
           # Create python3→python alias in Git-embedded MSYS2 /usr/bin
           python_loc=$(command -v python 2>/dev/null || command -v py 2>/dev/null)
           if [ -n "$python_loc" ] && [ ! -x /usr/bin/python3 ]; then
@@ -50,7 +52,12 @@ jobs:
       - name: Install Python packages
         run: |
           py_cmd=$(command -v python3 2>/dev/null || command -v python 2>/dev/null || echo python3)
-          $py_cmd -m pip install cantools
+          pip_extra=""
+          if [ "$RUNNER_OS" = "macOS" ] && $py_cmd -m pip --version >/dev/null 2>&1; then
+            # Homebrew Python blocks system pip installs (PEP 668)
+            pip_extra="--break-system-packages"
+          fi
+          $py_cmd -m pip install $pip_extra cantools
 
       - name: Generate configuration
         run: make gen

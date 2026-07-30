@@ -34,7 +34,12 @@ jobs:
       - name: Install Python packages
         run: |
           py_cmd=$(command -v python3 2>/dev/null || command -v python 2>/dev/null || echo python3)
-          $py_cmd -m pip install cantools
+          pip_extra=""
+          if [ "$RUNNER_OS" = "macOS" ] && $py_cmd -m pip --version >/dev/null 2>&1; then
+            # Homebrew Python blocks system pip installs (PEP 668)
+            pip_extra="--break-system-packages"
+          fi
+          $py_cmd -m pip install $pip_extra cantools
 
       - name: Full clean rebuild
         run: make clean && make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
