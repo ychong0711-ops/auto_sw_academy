@@ -76,19 +76,23 @@ $(BUILD)/ex1_8_cpp_fixed_point: ex1_embedded_c/src/ex1_8_cpp_fixed_point.cpp | $
 	$(CXX) $(CXXFLAGS) $< -o $@
 
 # ---- EX2: 미니 AUTOSAR (생성된 Cfg 포함) ----
+# 주의: 생성된 헤더(Cfg_Ids.h)는 *order-only*( | 이후)로 건다.
+# 정방향 prerequisite 으로 두면 $^ 에 .h 가 섞여 들어가 컴파일 명령줄에
+# 헤더가 인자로 따라가고, Apple clang(macOS cc)이 입력 타입 오류로 실패한다.
+# (.c 생성 파일들은 링크해야 하므로 정방향 prerequisite 으로 둔다.)
 EX2_GEN_CFG := generated/Com_Cfg.c generated/CanIf_Cfg.c generated/PduR_Cfg.c
 
-$(BUILD)/ex2_signal_flow: ex2_mini_autosar/test/test_ex2_signal_flow.c $(EX2_SRC) $(EX2_GEN_CFG) generated/Cfg_Ids.h | $(BUILD)
+$(BUILD)/ex2_signal_flow: ex2_mini_autosar/test/test_ex2_signal_flow.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD) generated/Cfg_Ids.h
 	$(CC) $(CFLAGS) $^ -o $@
 
 # EX2 개별 계층 단위 테스트
-$(BUILD)/ex2_com: ex2_mini_autosar/test/test_ex2_com.c $(EX2_SRC) $(EX2_GEN_CFG) generated/Cfg_Ids.h | $(BUILD)
+$(BUILD)/ex2_com: ex2_mini_autosar/test/test_ex2_com.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD) generated/Cfg_Ids.h
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(BUILD)/ex2_simmcu: ex2_mini_autosar/test/test_ex2_simmcu.c ex2_mini_autosar/src/SimMcu.c generated/Cfg_Ids.h | $(BUILD)
+$(BUILD)/ex2_simmcu: ex2_mini_autosar/test/test_ex2_simmcu.c ex2_mini_autosar/src/SimMcu.c | $(BUILD) generated/Cfg_Ids.h
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(BUILD)/ex2_simbus: ex2_mini_autosar/test/test_ex2_simbus.c $(EX2_SRC) $(EX2_GEN_CFG) generated/Cfg_Ids.h | $(BUILD)
+$(BUILD)/ex2_simbus: ex2_mini_autosar/test/test_ex2_simbus.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD) generated/Cfg_Ids.h
 	$(CC) $(CFLAGS) $^ -o $@
 
 # ---- EX3: 통신/진단 ----
@@ -114,7 +118,7 @@ $(BUILD)/ex4_wdg: ex4_safety_security/test/test_ex4_wdg.c ex4_safety_security/sr
 
 # ---- CAPSTONE ----
 $(BUILD)/capstone_demo: capstone/main_capstone.c $(EX3_SRC) $(EX4_SRC) \
-                        generated/Uds_Data.c generated/Uds_Data.h generated/Cfg_Ids.h | $(BUILD)
+                        generated/Uds_Data.c | $(BUILD) generated/Uds_Data.h generated/Cfg_Ids.h
 	$(CC) $(CFLAGS) $(filter %.c,$^) -o $@
 
 # ---- 정적 분석 (cppcheck) ----
