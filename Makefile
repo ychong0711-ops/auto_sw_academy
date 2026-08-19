@@ -21,16 +21,22 @@ PYTHON  ?= python3   # <-- supply PYTHON=python env var on Windows
 .DEFAULT_GOAL := all
 
 # ---- 설정 생성 (미니 툴 체인): config/ecu.json -> generated/ ----
+# 생성기는 8개 산출물을 한 번에 만든다. 산출물이 하나라도 없으면(=클론 직후)
+# make 가 이 규칙을 타서 자동으로 생성하도록, 빌드 규칙들은 .stamp 가 아닌
+# 실제 출력 파일을 prerequisite 으로 거는다(.stamp 는 갱신 트리거 전용).
 GEN_OUTS := generated/Cfg_Ids.h generated/Com_Cfg.c generated/CanIf_Cfg.c \
             generated/PduR_Cfg.c generated/Uds_Data.h generated/Uds_Data.c \
             generated/VehicleNetwork.dbc generated/SIGNAL_DOC.md
 
+$(GEN_OUTS): generated/.stamp ;
+
 generated/.stamp: config/ecu.json tools/gen_cfg.py
-	$(PYTHON) tools/gen_cfg.py config/ecu.json generated/
+	@mkdir -p generated
+	$(PYTHON) tools/gen_cfg.py config/ecu.json generated
 	@touch $@
 
 .PHONY: gen
-gen: generated/.stamp
+gen: $(GEN_OUTS)
 
 EX1 := ex1_1_bit_ops ex1_2_register_map ex1_3_ring_buffer ex1_4_fixed_point ex1_5_state_machine
 EX1_CPP := ex1_6_cpp_state_machine ex1_7_cpp_template_buffer ex1_8_cpp_fixed_point
@@ -72,17 +78,17 @@ $(BUILD)/ex1_8_cpp_fixed_point: ex1_embedded_c/src/ex1_8_cpp_fixed_point.cpp | $
 # ---- EX2: 미니 AUTOSAR (생성된 Cfg 포함) ----
 EX2_GEN_CFG := generated/Com_Cfg.c generated/CanIf_Cfg.c generated/PduR_Cfg.c
 
-$(BUILD)/ex2_signal_flow: ex2_mini_autosar/test/test_ex2_signal_flow.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD) generated/.stamp
+$(BUILD)/ex2_signal_flow: ex2_mini_autosar/test/test_ex2_signal_flow.c $(EX2_SRC) $(EX2_GEN_CFG) generated/Cfg_Ids.h | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
 # EX2 개별 계층 단위 테스트
-$(BUILD)/ex2_com: ex2_mini_autosar/test/test_ex2_com.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD) generated/.stamp
+$(BUILD)/ex2_com: ex2_mini_autosar/test/test_ex2_com.c $(EX2_SRC) $(EX2_GEN_CFG) generated/Cfg_Ids.h | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(BUILD)/ex2_simmcu: ex2_mini_autosar/test/test_ex2_simmcu.c ex2_mini_autosar/src/SimMcu.c | $(BUILD)
+$(BUILD)/ex2_simmcu: ex2_mini_autosar/test/test_ex2_simmcu.c ex2_mini_autosar/src/SimMcu.c generated/Cfg_Ids.h | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(BUILD)/ex2_simbus: ex2_mini_autosar/test/test_ex2_simbus.c $(EX2_SRC) $(EX2_GEN_CFG) | $(BUILD) generated/.stamp
+$(BUILD)/ex2_simbus: ex2_mini_autosar/test/test_ex2_simbus.c $(EX2_SRC) $(EX2_GEN_CFG) generated/Cfg_Ids.h | $(BUILD)
 	$(CC) $(CFLAGS) $^ -o $@
 
 # ---- EX3: 통신/진단 ----
@@ -108,7 +114,7 @@ $(BUILD)/ex4_wdg: ex4_safety_security/test/test_ex4_wdg.c ex4_safety_security/sr
 
 # ---- CAPSTONE ----
 $(BUILD)/capstone_demo: capstone/main_capstone.c $(EX3_SRC) $(EX4_SRC) \
-                        generated/Uds_Data.c generated/Uds_Data.h | $(BUILD) generated/.stamp
+                        generated/Uds_Data.c generated/Uds_Data.h generated/Cfg_Ids.h | $(BUILD)
 	$(CC) $(CFLAGS) $(filter %.c,$^) -o $@
 
 # ---- 정적 분석 (cppcheck) ----
