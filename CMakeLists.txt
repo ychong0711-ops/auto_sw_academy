@@ -134,6 +134,7 @@ file(GLOB EX3_SRC CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/ex3_comm_diag/src/*.c")
 file(GLOB EX4_SRC CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/ex4_safety_security/src/*.c")
 add_executable(capstone_demo capstone/main_capstone.c ${EX3_SRC} ${EX4_SRC}
                ${GEN_DIR}/Uds_Data.c)
+add_named_test(capstone_demo)
 
 # ---- check: CTest 로 전체 18 스위트 실행 (Makefile check 대응) ----
 add_custom_target(check
@@ -143,16 +144,17 @@ add_custom_target(check
             ex1_8_cpp_fixed_point
             ex2_signal_flow ex2_com ex2_simmcu ex2_simbus
             ex3_can_signal ex3_isotp ex3_uds
-            ex4_crc_e2e ex4_secoc ex4_wdg
+            ex4_crc_e2e ex4_secoc ex4_wdg capstone_demo
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "전체 테스트 스위트 실행 (CTest)")
 
-# ---- trace-check: capstone 트레이스 -> DBC 디코드 (cantools / stdlib 이중 엔진) ----
+# ---- trace-check: capstone 트레이스 -> DBC 디코드 ----
+# 콘솔 출력은 CTest/CI 로그로 흘리고, 트레이스 파일만 별도 저장한다.
+# (두 엔진 비교 + 기대값/집계의 엄격 검증은 Makefile trace-check 이 담당한다.)
 set(LOG_DIR ${CMAKE_BINARY_DIR}/logs)
 add_custom_target(trace-check
     COMMAND ${CMAKE_COMMAND} -E make_directory ${LOG_DIR}
     COMMAND $<TARGET_FILE:capstone_demo> --trace ${LOG_DIR}/capstone_trace.log
-            > ${LOG_DIR}/capstone_console.log
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/decode_trace.py
             ${GEN_DIR}/VehicleNetwork.dbc ${LOG_DIR}/capstone_trace.log
     DEPENDS capstone_demo gen
