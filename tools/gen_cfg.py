@@ -69,6 +69,12 @@ def validate(cfg, errors, warns):
                 errors.append(f"{d['name']}: static value 누락")
             if d["name"] == "VIN" and len(d.get("value", "")) != 17:
                 errors.append(f"VIN 길이 {len(d.get('value',''))} — 반드시 17")
+            if d.get("value_kind") == "hexbytes":
+                # "0x20,0x26,..." 형식의 바이트 개수가 선언된 length 와 같은지 검증
+                byte_count = len([b for b in str(d.get("value", "")).split(",") if b.strip()])
+                if byte_count != d.get("length", 0):
+                    errors.append(f"{d['name']}: hexbytes 바이트 {byte_count}개가 "
+                                  f"length({d.get('length', 0)})와 불일치")
         else:
             if not (1 <= d.get("length", 0) <= 4):
                 errors.append(f"{d['name']}: dynamic DID 길이 {d.get('length')} — 1..4")
@@ -254,7 +260,8 @@ def main():
     for fn, content in outputs.items():
         with open(os.path.join(out_dir, fn), "w", encoding="utf-8") as f:
             f.write(content)
-        print(f"[gen_cfg][생성] {out_dir}/{fn}")
+        # out_dir 끝 슬래시 유무와 무관하게 경로를 깔끔하게 표시
+        print(f"[gen_cfg][생성] {os.path.join(out_dir, fn)}")
     print("[gen_cfg] 검증 통과 + 생성 완료")
     return 0
 
