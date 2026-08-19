@@ -1,29 +1,29 @@
-# 🚗 Auto SW Academy — AUTOSAR 역량 체인 실습 프로그램
+# 🚗 Auto SW Academy — AUTOSAR Competency Chain Hands-on Program
 
 [![ci](https://github.com/ychong0711-ops/auto_sw_academy/actions/workflows/ci.yml/badge.svg)](https://github.com/ychong0711-ops/auto_sw_academy/actions)
 [![nightly](https://github.com/ychong0711-ops/auto_sw_academy/actions/workflows/nightly.yml/badge.svg)](https://github.com/ychong0711-ops/auto_sw_academy/actions/workflows/nightly.yml)
 
-> ⚠️ GitHub에 push 시 CI가 자동 실행됩니다. 배지가 초록색이면 통과입니다.
-> 그러면 push/PR 시 CI가 자동 실행되고 배지가 초록색으로 활성화됩니다.
+> ⚠️ CI is automatically executed on GitHub push. If the badge is green, it means passing.
+> Then, CI is automatically executed on push/PR and the badge is activated in green.
 
-> **C/C++ 임베디드 → AUTOSAR BSW/MCAL → 자동차 통신/진단 → 기능안전/보안/ASPICE**
-> 4단계 역량 체인 전체를 **실제로 빌드하고, 돌려보고, 깨뜨려 보는** 핸즈온 커리큘럼입니다.
-> 모든 코드는 PC(gcc)에서 실행됩니다. 타겟 보드 불필요.
+> **C/C++ Embedded → AUTOSAR BSW/MCAL → Automotive Communication/Diagnosis → Functional Safety/Security/ASPICE**
+> This is a hands-on curriculum that covers the entire 4-step competency chain: **build, test, and break in practice**.
+> All code runs on PC (gcc). No target board required.
 
-## 빠른 시작
+## Quick Start
 
 ```bash
 cd auto_sw_academy
-make -j4        # 설정 생성(tools/gen_cfg.py) → 전체 빌드 (경고 0건 기준)
-make check     # 전체 테스트 18종, 259개 체크
-./build/capstone_demo   # 통합 시연 (아래 '통합 데모' 참조)
-make trace-check  # 버스 트레이스 기록 → 생성된 .dbc 로 신호 디코드 (미니 CANoe 워크플로)
-# 또는 한 번에:  ./run_all.sh
-# STM32 크로스 컴파일: cd porting/stm32 && make -f Makefile.stm32
-# 설정 변경: config/ecu.json 편집 후 다시 make → generated/ 전체 재생성
+make -j4        # Generate configuration (tools/gen_cfg.py) → Build all (0 warnings)
+make check     # Run all 18 test suites, 259 checks
+./build/capstone_demo   # Integrated demo (see 'Integrated Demo' below)
+make trace-check  # Record bus trace → Decode with generated .dbc (mini CANoe workflow)
+# Or all at once:  ./run_all.sh
+# STM32 cross-compile: cd porting/stm32 && make -f Makefile.stm32
+# Change settings: Edit config/ecu.json then run make again → Regenerate entire generated/
 ```
 
-## 역량 체인 로드맵
+## Competency Chain Roadmap
 
 ```
 [1단계] 임베디드 C/C++            [2단계] AUTOSAR 아키텍처            [3단계] 통신/진단             [4단계] 안전/보안/프로세스
@@ -34,9 +34,9 @@ make trace-check  # 버스 트레이스 기록 → 생성된 .dbc 로 신호 디
  ├ C++ OOP 상태기계 (템플릿)       └ 설정(Cfg) 테이블 기반 설계        ├ UDS 서버 (ISO 14229-1)      └ ASPICE 산출물 세트
  ├ C++ 템플릿 링버퍼 (RAII)                                          └ 가상 CAN 버스(vcan)
  └ C++ Q16.16 FixedPoint 클래스
-                                                             ┌ STM32 포팅: porting/stm32/
-                    ▲ 각 단계는 직전 단계 위에 쌓입니다: 비트연산 없이 MCAL 없고,
-                      레이어링 없이 진단 스택 없고, 프로토콜 없이 안전/보안 설계 불가.
+                                                              ┌ STM32 포팅: porting/stm32/
+                     ▲ 각 단계는 직전 단계 위에 쌓입니다: 비트연산 없이 MCAL 없고,
+                       레이어링 없이 진단 스택 없고, 프로토콜 없이 안전/보안 설계 불가.
 ```
 
 디렉터리별 상세 가이드는 `docs/` 에 있습니다:
